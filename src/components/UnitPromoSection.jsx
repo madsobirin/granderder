@@ -99,7 +99,7 @@ const UnitPromoSection = () => {
           >
             <div className="w-full md:w-1/2 aspect-4/3 md:aspect-auto md:min-h-[400px] relative overflow-hidden bg-brand-cream/10">
               <Image
-                src="/images/1Home.jpeg"
+                src="/images/18Home.jpeg"
                 alt="Unit Ruko Type 30"
                 width={1080}
                 height={1080}

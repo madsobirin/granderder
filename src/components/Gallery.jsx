@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
@@ -32,31 +32,41 @@ const Gallery = () => {
     };
   }, [selectedImage]);
 
-  const handleNext = (e) => {
-    e.stopPropagation();
-    if (selectedImage !== null) {
-      setSelectedImage((selectedImage + 1) % images.length);
-    }
-  };
+  const handleNext = useCallback(
+    (e) => {
+      if (e) e.stopPropagation();
+      setSelectedImage((prev) => {
+        if (prev === null) return null;
+        return (prev + 1) % images.length;
+      });
+    },
+    [images.length],
+  );
 
-  const handlePrev = (e) => {
-    e.stopPropagation();
-    if (selectedImage !== null) {
-      setSelectedImage((selectedImage - 1 + images.length) % images.length);
-    }
-  };
+  const handlePrev = useCallback(
+    (e) => {
+      if (e) e.stopPropagation();
+      setSelectedImage((prev) => {
+        if (prev === null) return null;
+        return (prev - 1 + images.length) % images.length;
+      });
+    },
+    [images.length],
+  );
 
   // Keyboard navigation
   useEffect(() => {
+    if (selectedImage === null) return;
+
     const handleKeyDown = (e) => {
-      if (selectedImage === null) return;
       if (e.key === "Escape") setSelectedImage(null);
       if (e.key === "ArrowRight") handleNext(e);
       if (e.key === "ArrowLeft") handlePrev(e);
     };
+
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedImage]);
+  }, [selectedImage, handleNext, handlePrev]);
 
   return (
     <section id="gallery" className="py-24 bg-brand-cream/30 relative">
@@ -115,12 +125,12 @@ const Gallery = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setSelectedImage(null)}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 sm:p-8 backdrop-blur-md"
+            className="fixed inset-0 z-100 flex items-center justify-center bg-black/90 p-4 sm:p-8 backdrop-blur-md"
           >
             {/* Close Button */}
             <button
               onClick={() => setSelectedImage(null)}
-              className="absolute top-6 right-6 md:top-8 md:right-8 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition-all z-[110]"
+              className="absolute top-6 right-6 md:top-8 md:right-8 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition-all z-110"
             >
               <X className="w-6 h-6 md:w-8 md:h-8" />
             </button>
@@ -128,7 +138,7 @@ const Gallery = () => {
             {/* Prev Navigation */}
             <button
               onClick={handlePrev}
-              className="absolute left-2 md:left-8 top-1/2 -translate-y-1/2 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-3 transition-all z-[110] hidden sm:block"
+              className="absolute left-2 md:left-8 top-1/2 -translate-y-1/2 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-3 transition-all z-110 hidden sm:block"
             >
               <ChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
             </button>
@@ -136,7 +146,7 @@ const Gallery = () => {
             {/* Next Navigation */}
             <button
               onClick={handleNext}
-              className="absolute right-2 md:right-8 top-1/2 -translate-y-1/2 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-3 transition-all z-[110] hidden sm:block"
+              className="absolute right-2 md:right-8 top-1/2 -translate-y-1/2 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-3 transition-all z-110 hidden sm:block"
             >
               <ChevronRight className="w-6 h-6 md:w-8 md:h-8" />
             </button>
@@ -160,7 +170,7 @@ const Gallery = () => {
               />
             </motion.div>
 
-            <div className="absolute bottom-6 left-0 right-0 flex items-center justify-center gap-4 z-[110] sm:hidden">
+            <div className="absolute bottom-6 left-0 right-0 flex items-center justify-center gap-4 z-110 sm:hidden">
               <button
                 onClick={handlePrev}
                 className="text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-3 transition-all"
