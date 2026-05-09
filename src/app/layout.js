@@ -9,16 +9,16 @@ const poppins = Poppins({
 
 export const metadata = {
   title: "Grand Ender | Perumahan Subsidi Modern di Cirebon",
+  icons: {
+    icon: "/home1.png",
+  },
   description:
     "Landing page Grand Ender dari Rizqoena Land. Informasi rumah subsidi modern minimalis di Desa Ender, Pangenan, Cirebon.",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html
-      lang="id"
-      className={`${poppins.variable} h-full scroll-smooth`}
-    >
+    <html lang="id" className={`${poppins.variable} h-full scroll-smooth`}>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
