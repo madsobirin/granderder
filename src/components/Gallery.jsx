@@ -84,6 +84,9 @@ const Gallery = () => {
           <h2 className="text-4xl md:text-5xl text-brand-navy mb-4">
             Lihat Lebih Dekat
           </h2>
+          <p className="text-brand-gold font-bold tracking-widest uppercase text-md mb-8 block">
+            Promo 1 juta Terima Kunci
+          </p>
         </motion.div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
