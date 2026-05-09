@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
+import Link from "next/link";
 
 // --- Data ---
 
@@ -240,13 +241,14 @@ const Navbar = () => {
           </div>
 
           <div className="hidden md:block">
-            <button
-              onClick={(e) => scrollTo(e, "kontak")}
+            <a
+              href="https://wa.me/6287786955568"
+              target="_blank"
               className="flex items-center gap-2 bg-brand-gold hover:bg-brand-gold/90 text-white px-6 py-2.5 rounded-full text-sm font-medium transition-all shadow-lg shadow-brand-gold/20"
             >
               <Phone className="w-4 h-4" />
               <span>Hubungi Kami</span>
-            </button>
+            </a>
           </div>
 
           <button
@@ -289,16 +291,14 @@ const Navbar = () => {
                 </a>
               ))}
               <div className="pt-4 mt-2 border-t border-brand-dark/5">
-                <button
-                  onClick={(e) => {
-                    scrollTo(e, "kontak");
-                    setIsMobileMenuOpen(false);
-                  }}
+                <a
+                  href="https://wa.me/6287786955568"
+                  target="_blank"
                   className="flex w-full justify-center items-center gap-2 bg-brand-gold hover:bg-brand-gold/90 text-white px-6 py-3.5 rounded-xl text-base font-medium transition-all shadow-lg shadow-brand-gold/20"
                 >
                   <Phone className="w-5 h-5" />
                   <span>Hubungi Kami</span>
-                </button>
+                </a>
               </div>
             </div>
           </motion.div>
@@ -366,6 +366,7 @@ const Hero = () => {
                 width={1080}
                 height={1080}
                 className="w-full h-full object-cover"
+                priority
               />
               <div className="absolute inset-0 bg-linear-to-t from-brand-navy/20 to-transparent"></div>
             </div>
@@ -553,6 +554,7 @@ const UnitPromoSection = () => {
                 width={1080}
                 height={1080}
                 className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                priority
               />
             </div>
             <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
@@ -840,14 +842,18 @@ const CTA = () => {
             transition={{ duration: 0.8 }}
             className="flex flex-col items-center md:items-end gap-6"
           >
-            <button className="bg-brand-gold hover:bg-white hover:text-brand-gold text-white px-10 py-5 rounded-2xl flex items-center gap-4 text-lg font-bold transition-all shadow-2xl shadow-brand-gold/30">
+            <Link
+              href="https://wa.me/6287786955568"
+              target="_blank"
+              className="bg-brand-gold hover:bg-white hover:text-brand-gold text-white px-10 py-5 rounded-2xl flex items-center gap-4 text-lg font-bold transition-all shadow-2xl shadow-brand-gold/30"
+            >
               <MessageCircle className="w-7 h-7" />
               Hubungi via WhatsApp
-            </button>
+            </Link>
             <div className="flex items-center gap-4 text-white/80">
               <Phone className="w-5 h-5 text-brand-gold" />
               <span className="font-mono text-xl tracking-tighter">
-                0812-3456-7890
+                0877-8695-5568
               </span>
             </div>
           </motion.div>
