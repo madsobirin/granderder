@@ -78,7 +78,7 @@ const Hero = () => {
                 <iframe
                   width="100%"
                   height="100%"
-                  src="https://www.youtube.com/embed/LXb3EKWsInQ?autoplay=1"
+                  src="https://www.youtube.com/embed/pdsarozxitQ?si=t0v0yx3OPIU8KrIQ"
                   title="Video Promosi"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
