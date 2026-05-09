@@ -3,11 +3,17 @@ import { motion } from "motion/react";
 import Image from "next/image";
 
 const Gallery = () => {
+  const additionalImages = Array.from(
+    { length: 29 },
+    (_, i) => `/images/${i + 11}Home.jpeg`,
+  );
   const images = [
     "/images/1Home.jpeg",
     "/images/2Home.jpeg",
     "/images/4Home.jpeg",
     "/images/9Home.jpeg",
+    "/images/10Home.jpeg",
+    ...additionalImages,
   ];
 
   return (
