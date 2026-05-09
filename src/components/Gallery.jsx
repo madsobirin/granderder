@@ -8,10 +8,10 @@ const Gallery = () => {
     (_, i) => `/images/${i + 11}Home.jpeg`,
   );
   const images = [
-    "/images/1Home.jpeg",
+    "/images/5Home.jpeg",
     "/images/2Home.jpeg",
     "/images/4Home.jpeg",
-    "/images/9Home.jpeg",
+    "/images/21Home.jpeg",
     "/images/10Home.jpeg",
     ...additionalImages,
   ];
