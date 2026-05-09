@@ -46,12 +46,12 @@ const Navbar = () => {
   }, [active]);
 
   const scrollTo = (e, id) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     const element = document.getElementById(id);
     if (element) {
       const offset = 80;
       const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - offset;
+      const offsetPosition = elementPosition + window.scrollY - offset;
 
       window.scrollTo({
         top: offsetPosition,
@@ -160,8 +160,11 @@ const Navbar = () => {
                   key={link.id}
                   href={`#${link.id}`}
                   onClick={(e) => {
-                    scrollTo(e, link.id);
+                    e.preventDefault();
                     setIsMobileMenuOpen(false);
+                    setTimeout(() => {
+                      scrollTo(null, link.id);
+                    }, 150);
                   }}
                   className={`block px-4 py-3 rounded-xl text-base font-medium ${
                     active === link.id

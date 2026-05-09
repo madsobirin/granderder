@@ -1,28 +1,15 @@
 "use client";
-import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
-import Features from "@/components/Features";
-import UnitPromoSection from "@/components/UnitPromoSection";
-import SpesifikasiSection from "@/components/SpesifikasiSection";
-import PersyaratanKPRSection from "@/components/PersyaratanKPRSection";
-import Gallery from "@/components/Gallery";
-import CTA from "@/components/CTA";
-import Footer from "@/components/Footer";
+import dynamic from "next/dynamic";
 
-export default function App() {
-  return (
-    <div className="min-h-screen selection:bg-brand-gold selection:text-white">
-      <Navbar />
-      <main>
-        <Hero />
-        <Features />
-        <UnitPromoSection />
-        <SpesifikasiSection />
-        <PersyaratanKPRSection />
-        <Gallery />
-        <CTA />
-      </main>
-      <Footer />
+const HomeContent = dynamic(() => import("@/components/HomeContent"), {
+  ssr: false,
+  loading: () => (
+    <div className="min-h-screen bg-brand-cream flex items-center justify-center">
+      <div className="w-10 h-10 border-4 border-brand-gold border-t-transparent rounded-full animate-spin" />
     </div>
-  );
+  ),
+});
+
+export default function Page() {
+  return <HomeContent />;
 }

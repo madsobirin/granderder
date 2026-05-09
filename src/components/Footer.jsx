@@ -1,3 +1,4 @@
+"use client";
 import { Home, MapPin } from "lucide-react";
 
 const Footer = () => {
