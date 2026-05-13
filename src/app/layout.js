@@ -1,11 +1,4 @@
-import { Poppins } from "next/font/google";
 import "./globals.css";
-
-const poppins = Poppins({
-  subsets: ["latin"],
-  variable: "--font-poppins",
-  weight: ["400", "500", "600", "700", "800"],
-});
 
 export const metadata = {
   title: "Grand Ender | Perumahan Subsidi Modern di Cirebon",
@@ -18,11 +11,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html
-      lang="id"
-      className={`${poppins.variable} h-full scroll-smooth`}
-      suppressHydrationWarning
-    >
+    <html lang="id" className="h-full scroll-smooth" suppressHydrationWarning>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         {children}
       </body>

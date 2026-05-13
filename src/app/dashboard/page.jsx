@@ -1,0 +1,641 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import {
+  ArrowUpRight,
+  ImagePlus,
+  LayoutGrid,
+  LogOut,
+  PencilLine,
+  Plus,
+  Save,
+  Trash2,
+} from "lucide-react";
+
+const emptyPromoForm = {
+  category: "",
+  title: "",
+  description: "",
+  imageUrl: "",
+  priceLabel: "",
+  buildingSize: "",
+  landSize: "",
+  bedrooms: "",
+  bathrooms: "",
+  businessLabel: "",
+  displayOrder: 0,
+  isPublished: true,
+};
+
+const emptyGalleryForm = {
+  title: "",
+  displayOrder: 0,
+  isPublished: true,
+  image: null,
+};
+
+export default function DashboardPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [savingPromo, setSavingPromo] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingPromoImage, setUploadingPromoImage] = useState(false);
+  const [promos, setPromos] = useState([]);
+  const [galleryImages, setGalleryImages] = useState([]);
+  const [promoForm, setPromoForm] = useState(emptyPromoForm);
+  const [galleryForm, setGalleryForm] = useState(emptyGalleryForm);
+  const [editingPromoId, setEditingPromoId] = useState(null);
+  const [statusMessage, setStatusMessage] = useState("");
+  const [promoImageFile, setPromoImageFile] = useState(null);
+
+  const stats = useMemo(
+    () => [
+      { label: "Total Promo", value: promos.length },
+      { label: "Galeri Aktif", value: galleryImages.length },
+      {
+        label: "Terbit",
+        value: promos.filter((item) => item.isPublished).length,
+      },
+    ],
+    [galleryImages.length, promos],
+  );
+
+  const loadDashboardData = useCallback(async () => {
+    setLoading(true);
+
+    try {
+      const [promoResponse, galleryResponse] = await Promise.all([
+        fetch("/api/admin/promos", { cache: "no-store" }),
+        fetch("/api/admin/gallery", { cache: "no-store" }),
+      ]);
+
+      if (promoResponse.status === 401 || galleryResponse.status === 401) {
+        router.push("/login");
+        return;
+      }
+
+      const promoData = await promoResponse.json();
+      const galleryData = await galleryResponse.json();
+
+      if (promoData.success) {
+        setPromos(promoData.promos);
+      }
+
+      if (galleryData.success) {
+        setGalleryImages(galleryData.galleryImages);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [router]);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      void loadDashboardData();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [loadDashboardData]);
+
+  const handleLogout = async () => {
+    await fetch("/api/logout", {
+      method: "POST",
+    });
+
+    router.push("/login");
+  };
+
+  const handlePromoSubmit = async (event) => {
+    event.preventDefault();
+    setSavingPromo(true);
+
+    const endpoint = editingPromoId
+      ? `/api/admin/promos/${editingPromoId}`
+      : "/api/admin/promos";
+    const method = editingPromoId ? "PUT" : "POST";
+
+    const response = await fetch(endpoint, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(promoForm),
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      setStatusMessage(data.message);
+      setPromoForm(emptyPromoForm);
+      setEditingPromoId(null);
+      await loadDashboardData();
+    } else {
+      setStatusMessage(data.message || "Gagal menyimpan promo.");
+    }
+
+    setSavingPromo(false);
+  };
+
+  const handleEditPromo = (promo) => {
+    setEditingPromoId(promo.id);
+    setPromoForm({
+      category: promo.category || "",
+      title: promo.title || "",
+      description: promo.description || "",
+      imageUrl: promo.imageUrl || "",
+      priceLabel: promo.priceLabel || "",
+      buildingSize: promo.buildingSize || "",
+      landSize: promo.landSize || "",
+      bedrooms: promo.bedrooms ?? "",
+      bathrooms: promo.bathrooms ?? "",
+      businessLabel: promo.businessLabel || "",
+      displayOrder: promo.displayOrder ?? 0,
+      isPublished: promo.isPublished ?? true,
+    });
+    setStatusMessage("Mode edit promo aktif.");
+  };
+
+  const handleDeletePromo = async (id) => {
+    const response = await fetch(`/api/admin/promos/${id}`, { method: "DELETE" });
+    const data = await response.json();
+    setStatusMessage(data.message);
+    if (data.success) {
+      await loadDashboardData();
+    }
+  };
+
+  const handleGallerySubmit = async (event) => {
+    event.preventDefault();
+    setUploadingImage(true);
+
+    const formData = new FormData();
+    formData.append("title", galleryForm.title);
+    formData.append("displayOrder", String(galleryForm.displayOrder));
+    formData.append("isPublished", String(galleryForm.isPublished));
+
+    if (galleryForm.image) {
+      formData.append("image", galleryForm.image);
+    }
+
+    const response = await fetch("/api/admin/gallery", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await response.json();
+    setStatusMessage(data.message);
+
+    if (data.success) {
+      setGalleryForm(emptyGalleryForm);
+      const fileInput = document.getElementById("gallery-image-input");
+      if (fileInput) {
+        fileInput.value = "";
+      }
+      await loadDashboardData();
+    }
+
+    setUploadingImage(false);
+  };
+
+  const handlePromoImageUpload = async () => {
+    if (!promoImageFile) {
+      setStatusMessage("Pilih file gambar promo dulu.");
+      return;
+    }
+
+    setUploadingPromoImage(true);
+
+    const formData = new FormData();
+    formData.append("image", promoImageFile);
+
+    const response = await fetch("/api/admin/uploads", {
+      method: "POST",
+      body: formData,
+    });
+    const data = await response.json();
+
+    if (data.success) {
+      setPromoForm((current) => ({
+        ...current,
+        imageUrl: data.imageUrl,
+      }));
+      setStatusMessage("Foto promo berhasil diunggah dan URL sudah terisi.");
+      setPromoImageFile(null);
+      const input = document.getElementById("promo-image-input");
+      if (input) {
+        input.value = "";
+      }
+    } else {
+      setStatusMessage(data.message || "Upload gambar promo gagal.");
+    }
+
+    setUploadingPromoImage(false);
+  };
+
+  const handleDeleteImage = async (id) => {
+    const response = await fetch(`/api/admin/gallery/${id}`, { method: "DELETE" });
+    const data = await response.json();
+    setStatusMessage(data.message);
+    if (data.success) {
+      await loadDashboardData();
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-brand-cream">
+      <div className="border-b border-brand-dark/5 bg-white/85 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-5 sm:px-6 lg:px-8">
+          <div>
+            <span className="block text-xs font-semibold uppercase tracking-[0.35em] text-brand-gold">
+              Grand Ender Residence
+            </span>
+            <h1 className="mt-2 text-3xl text-brand-navy">Dashboard Admin</h1>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => router.push("/")}
+              className="inline-flex items-center gap-2 rounded-full border border-brand-navy/10 bg-white px-4 py-2 text-sm font-medium text-brand-navy transition hover:border-brand-gold hover:text-brand-gold"
+            >
+              <ArrowUpRight className="h-4 w-4" />
+              Lihat Website
+            </button>
+            <button
+              onClick={handleLogout}
+              className="inline-flex items-center gap-2 rounded-full bg-brand-navy px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-navy/90"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mb-8 grid gap-4 md:grid-cols-3">
+          {stats.map((item) => (
+            <div
+              key={item.label}
+              className="rounded-3xl border border-white/70 bg-white p-6 shadow-xl shadow-brand-navy/5"
+            >
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-gold">
+                {item.label}
+              </p>
+              <p className="mt-3 text-4xl text-brand-navy">{item.value}</p>
+            </div>
+          ))}
+        </div>
+
+        {statusMessage ? (
+          <div className="mb-6 rounded-2xl border border-brand-gold/20 bg-brand-gold/10 px-4 py-3 text-sm text-brand-navy">
+            {statusMessage}
+          </div>
+        ) : null}
+
+        <div className="grid gap-8 xl:grid-cols-[1.05fr_0.95fr]">
+          <section className="space-y-8">
+            <div className="rounded-[2rem] border border-white/80 bg-white p-6 shadow-xl shadow-brand-navy/5 sm:p-8">
+              <div className="mb-6 flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-gold/10 text-brand-gold">
+                  <LayoutGrid className="h-6 w-6" />
+                </div>
+                <div>
+                  <h2 className="text-2xl text-brand-navy">Kelola Promo Rumah</h2>
+                  <p className="text-sm text-brand-navy/60">
+                    Tambah atau ubah kartu promo yang tampil di halaman utama.
+                  </p>
+                </div>
+              </div>
+
+              <form onSubmit={handlePromoSubmit} className="grid gap-4 md:grid-cols-2">
+                <input
+                  value={promoForm.category}
+                  onChange={(event) =>
+                    setPromoForm((current) => ({ ...current, category: event.target.value }))
+                  }
+                  placeholder="Kategori, contoh: Rumah Subsidi"
+                  className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
+                  required
+                />
+                <input
+                  value={promoForm.title}
+                  onChange={(event) =>
+                    setPromoForm((current) => ({ ...current, title: event.target.value }))
+                  }
+                  placeholder="Judul promo"
+                  className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
+                  required
+                />
+                <textarea
+                  value={promoForm.description}
+                  onChange={(event) =>
+                    setPromoForm((current) => ({ ...current, description: event.target.value }))
+                  }
+                  placeholder="Deskripsi promo rumah"
+                  className="min-h-32 rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold md:col-span-2"
+                  required
+                />
+                <input
+                  value={promoForm.imageUrl}
+                  onChange={(event) =>
+                    setPromoForm((current) => ({ ...current, imageUrl: event.target.value }))
+                  }
+                  placeholder="URL gambar, contoh: /uploads/nama-file.jpg"
+                  className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold md:col-span-2"
+                  required
+                />
+                <div className="rounded-2xl border border-dashed border-brand-gold/40 bg-brand-cream/30 px-4 py-4 md:col-span-2">
+                  <span className="mb-2 block text-sm font-medium text-brand-navy">
+                    Atau upload gambar promo langsung
+                  </span>
+                  <div className="flex flex-col gap-3 md:flex-row">
+                    <input
+                      id="promo-image-input"
+                      type="file"
+                      accept="image/*"
+                      onChange={(event) => setPromoImageFile(event.target.files?.[0] || null)}
+                      className="block w-full text-sm text-brand-navy/70"
+                    />
+                    <button
+                      type="button"
+                      onClick={handlePromoImageUpload}
+                      disabled={uploadingPromoImage}
+                      className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-gold px-4 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-brand-gold/90 disabled:opacity-70"
+                    >
+                      <ImagePlus className="h-4 w-4" />
+                      {uploadingPromoImage ? "Upload..." : "Upload Foto Promo"}
+                    </button>
+                  </div>
+                </div>
+                <input
+                  value={promoForm.priceLabel}
+                  onChange={(event) =>
+                    setPromoForm((current) => ({ ...current, priceLabel: event.target.value }))
+                  }
+                  placeholder="Label promo, contoh: DP ringan"
+                  className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
+                />
+                <input
+                  value={promoForm.businessLabel}
+                  onChange={(event) =>
+                    setPromoForm((current) => ({ ...current, businessLabel: event.target.value }))
+                  }
+                  placeholder="Nilai tambah, contoh: Strategis"
+                  className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
+                />
+                <input
+                  value={promoForm.buildingSize}
+                  onChange={(event) =>
+                    setPromoForm((current) => ({ ...current, buildingSize: event.target.value }))
+                  }
+                  placeholder="Luas bangunan"
+                  className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
+                />
+                <input
+                  value={promoForm.landSize}
+                  onChange={(event) =>
+                    setPromoForm((current) => ({ ...current, landSize: event.target.value }))
+                  }
+                  placeholder="Luas tanah"
+                  className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
+                />
+                <input
+                  value={promoForm.bedrooms}
+                  onChange={(event) =>
+                    setPromoForm((current) => ({ ...current, bedrooms: event.target.value }))
+                  }
+                  placeholder="Jumlah kamar tidur"
+                  className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
+                />
+                <input
+                  value={promoForm.bathrooms}
+                  onChange={(event) =>
+                    setPromoForm((current) => ({ ...current, bathrooms: event.target.value }))
+                  }
+                  placeholder="Jumlah kamar mandi"
+                  className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
+                />
+                <input
+                  type="number"
+                  value={promoForm.displayOrder}
+                  onChange={(event) =>
+                    setPromoForm((current) => ({ ...current, displayOrder: event.target.value }))
+                  }
+                  placeholder="Urutan tampil"
+                  className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
+                />
+                <label className="flex items-center gap-3 rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 text-sm text-brand-navy">
+                  <input
+                    type="checkbox"
+                    checked={promoForm.isPublished}
+                    onChange={(event) =>
+                      setPromoForm((current) => ({
+                        ...current,
+                        isPublished: event.target.checked,
+                      }))
+                    }
+                  />
+                  Tampilkan di website
+                </label>
+
+                <div className="flex flex-wrap gap-3 md:col-span-2">
+                  <button
+                    type="submit"
+                    disabled={savingPromo}
+                    className="inline-flex items-center gap-2 rounded-full bg-brand-navy px-5 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white transition hover:bg-brand-navy/92 disabled:opacity-70"
+                  >
+                    {editingPromoId ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                    {savingPromo ? "Menyimpan..." : editingPromoId ? "Update Promo" : "Tambah Promo"}
+                  </button>
+                  {editingPromoId ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingPromoId(null);
+                        setPromoForm(emptyPromoForm);
+                        setStatusMessage("Mode tambah promo aktif.");
+                      }}
+                      className="rounded-full border border-brand-navy/10 px-5 py-3 text-sm font-medium text-brand-navy"
+                    >
+                      Batal Edit
+                    </button>
+                  ) : null}
+                </div>
+              </form>
+            </div>
+
+            <div className="rounded-[2rem] border border-white/80 bg-white p-6 shadow-xl shadow-brand-navy/5 sm:p-8">
+              <div className="mb-6 flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-gold/10 text-brand-gold">
+                  <ImagePlus className="h-6 w-6" />
+                </div>
+                <div>
+                  <h2 className="text-2xl text-brand-navy">Upload Gambar Galeri</h2>
+                  <p className="text-sm text-brand-navy/60">
+                    Gambar baru akan masuk ke halaman galeri secara otomatis.
+                  </p>
+                </div>
+              </div>
+
+              <form onSubmit={handleGallerySubmit} className="grid gap-4 md:grid-cols-2">
+                <input
+                  value={galleryForm.title}
+                  onChange={(event) =>
+                    setGalleryForm((current) => ({ ...current, title: event.target.value }))
+                  }
+                  placeholder="Judul gambar"
+                  className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
+                  required
+                />
+                <input
+                  type="number"
+                  value={galleryForm.displayOrder}
+                  onChange={(event) =>
+                    setGalleryForm((current) => ({
+                      ...current,
+                      displayOrder: event.target.value,
+                    }))
+                  }
+                  placeholder="Urutan tampil"
+                  className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
+                />
+                <label className="md:col-span-2 rounded-2xl border border-dashed border-brand-gold/40 bg-brand-cream/30 px-4 py-5 text-sm text-brand-navy/70">
+                  <span className="mb-2 block font-medium text-brand-navy">Pilih file gambar</span>
+                  <input
+                    id="gallery-image-input"
+                    type="file"
+                    accept="image/*"
+                    onChange={(event) =>
+                      setGalleryForm((current) => ({
+                        ...current,
+                        image: event.target.files?.[0] || null,
+                      }))
+                    }
+                    className="block w-full text-sm"
+                    required
+                  />
+                </label>
+                <label className="flex items-center gap-3 rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 text-sm text-brand-navy md:col-span-2">
+                  <input
+                    type="checkbox"
+                    checked={galleryForm.isPublished}
+                    onChange={(event) =>
+                      setGalleryForm((current) => ({
+                        ...current,
+                        isPublished: event.target.checked,
+                      }))
+                    }
+                  />
+                  Tampilkan di halaman galeri
+                </label>
+                <button
+                  type="submit"
+                  disabled={uploadingImage}
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-gold px-5 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white transition hover:bg-brand-gold/90 disabled:opacity-70"
+                >
+                  <ImagePlus className="h-4 w-4" />
+                  {uploadingImage ? "Mengunggah..." : "Upload Gambar"}
+                </button>
+              </form>
+            </div>
+          </section>
+
+          <section className="space-y-8">
+            <div className="rounded-[2rem] border border-white/80 bg-white p-6 shadow-xl shadow-brand-navy/5 sm:p-8">
+              <h2 className="mb-6 text-2xl text-brand-navy">Daftar Promo Aktif</h2>
+              <div className="space-y-4">
+                {loading ? (
+                  <p className="text-sm text-brand-navy/60">Memuat data promo...</p>
+                ) : promos.length ? (
+                  promos.map((promo) => (
+                    <div
+                      key={promo.id}
+                      className="rounded-3xl border border-brand-dark/5 bg-brand-cream/40 p-5"
+                    >
+                      <div className="mb-4 flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-gold">
+                            {promo.category}
+                          </p>
+                          <h3 className="mt-2 text-xl text-brand-navy">{promo.title}</h3>
+                        </div>
+                        <div className="rounded-full bg-white px-3 py-1 text-xs font-medium text-brand-navy/60">
+                          Urutan {promo.displayOrder}
+                        </div>
+                      </div>
+                      <p className="mb-4 text-sm leading-relaxed text-brand-navy/65">
+                        {promo.description}
+                      </p>
+                      <div className="flex flex-wrap gap-3">
+                        <button
+                          type="button"
+                          onClick={() => handleEditPromo(promo)}
+                          className="inline-flex items-center gap-2 rounded-full border border-brand-navy/10 bg-white px-4 py-2 text-sm font-medium text-brand-navy"
+                        >
+                          <PencilLine className="h-4 w-4" />
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeletePromo(promo.id)}
+                          className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          Hapus
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-brand-navy/60">Belum ada promo tambahan.</p>
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-[2rem] border border-white/80 bg-white p-6 shadow-xl shadow-brand-navy/5 sm:p-8">
+              <h2 className="mb-6 text-2xl text-brand-navy">Galeri Website</h2>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {loading ? (
+                  <p className="text-sm text-brand-navy/60">Memuat gambar galeri...</p>
+                ) : galleryImages.length ? (
+                  galleryImages.map((image) => (
+                    <div
+                      key={image.id}
+                      className="overflow-hidden rounded-3xl border border-brand-dark/5 bg-brand-cream/40"
+                    >
+                      <div className="relative aspect-square">
+                        <Image
+                          src={image.imageUrl}
+                          alt={image.title}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="p-4">
+                        <h3 className="text-lg text-brand-navy">{image.title}</h3>
+                        <p className="mt-1 text-xs uppercase tracking-[0.25em] text-brand-gold">
+                          Urutan {image.displayOrder}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteImage(image.id)}
+                          className="mt-4 inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          Hapus Gambar
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-brand-navy/60">Belum ada gambar tambahan.</p>
+                )}
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  );
+}
