@@ -80,8 +80,16 @@ export default function DashboardPage() {
           value: promoForm.bathrooms,
           icon: Bath,
         },
-      ].filter((item) => item.value !== null && item.value !== undefined && item.value !== ""),
-    [promoForm.bathrooms, promoForm.bedrooms, promoForm.buildingSize, promoForm.landSize],
+      ].filter(
+        (item) =>
+          item.value !== null && item.value !== undefined && item.value !== "",
+      ),
+    [
+      promoForm.bathrooms,
+      promoForm.bedrooms,
+      promoForm.buildingSize,
+      promoForm.landSize,
+    ],
   );
 
   const stats = useMemo(
@@ -200,7 +208,9 @@ export default function DashboardPage() {
   };
 
   const handleDeletePromo = async (id) => {
-    const response = await fetch(`/api/admin/promos/${id}`, { method: "DELETE" });
+    const response = await fetch(`/api/admin/promos/${id}`, {
+      method: "DELETE",
+    });
     const data = await response.json();
     setStatusMessage(data.message);
     if (data.success) {
@@ -286,7 +296,9 @@ export default function DashboardPage() {
   };
 
   const handleDeleteImage = async (id) => {
-    const response = await fetch(`/api/admin/gallery/${id}`, { method: "DELETE" });
+    const response = await fetch(`/api/admin/gallery/${id}`, {
+      method: "DELETE",
+    });
     const data = await response.json();
     setStatusMessage(data.message);
     if (data.success) {
@@ -345,287 +357,352 @@ export default function DashboardPage() {
         ) : null}
 
         <div className="grid gap-8 xl:grid-cols-[1.05fr_0.95fr]">
-          <section className="space-y-8">
+          <section className="xl:col-span-2">
             <div className="rounded-[2rem] border border-white/80 bg-white p-6 shadow-xl shadow-brand-navy/5 sm:p-8">
               <div className="mb-6 flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-gold/10 text-brand-gold">
                   <LayoutGrid className="h-6 w-6" />
                 </div>
                 <div>
-                  <h2 className="text-2xl text-brand-navy">Kelola Promo Rumah</h2>
+                  <h2 className="text-2xl text-brand-navy">
+                    Kelola Promo Rumah
+                  </h2>
                   <p className="text-sm text-brand-navy/60">
                     Tambah atau ubah kartu promo yang tampil di halaman utama.
                   </p>
                 </div>
               </div>
 
-              <form onSubmit={handlePromoSubmit} className="grid gap-4 md:grid-cols-2">
-                <input
-                  value={promoForm.category}
-                  onChange={(event) =>
-                    setPromoForm((current) => ({ ...current, category: event.target.value }))
-                  }
-                  placeholder="Kategori, contoh: Rumah Subsidi"
-                  className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
-                  required
-                />
-                <input
-                  value={promoForm.title}
-                  onChange={(event) =>
-                    setPromoForm((current) => ({ ...current, title: event.target.value }))
-                  }
-                  placeholder="Judul promo"
-                  className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
-                  required
-                />
-                <textarea
-                  value={promoForm.description}
-                  onChange={(event) =>
-                    setPromoForm((current) => ({ ...current, description: event.target.value }))
-                  }
-                  placeholder="Deskripsi promo rumah"
-                  className="min-h-32 rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold md:col-span-2"
-                  required
-                />
-                <label
-                  htmlFor="promo-image-input"
-                  onDragOver={(event) => {
-                    event.preventDefault();
-                    setPromoDropActive(true);
-                  }}
-                  onDragLeave={() => setPromoDropActive(false)}
-                  onDrop={(event) => {
-                    event.preventDefault();
-                    setPromoDropActive(false);
-                    void handlePromoImageUpload(event.dataTransfer.files?.[0]);
-                  }}
-                  className={`cursor-pointer rounded-2xl border border-dashed px-4 py-5 text-sm transition md:col-span-2 ${
-                    promoDropActive
-                      ? "border-brand-gold bg-brand-gold/10"
-                      : "border-brand-gold/40 bg-brand-cream/30 hover:border-brand-gold"
-                  }`}
-                >
+              <form
+                onSubmit={handlePromoSubmit}
+                className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.82fr)] lg:items-start"
+              >
+                <div className="grid gap-4 md:grid-cols-2">
                   <input
-                    id="promo-image-input"
-                    type="file"
-                    accept="image/*"
-                    onChange={(event) => {
-                      void handlePromoImageUpload(event.target.files?.[0]);
-                    }}
-                    className="sr-only"
+                    value={promoForm.category}
+                    onChange={(event) =>
+                      setPromoForm((current) => ({
+                        ...current,
+                        category: event.target.value,
+                      }))
+                    }
+                    placeholder="Kategori, contoh: Rumah Subsidi"
+                    className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
+                    required
                   />
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                    <div className="relative h-32 w-full overflow-hidden rounded-2xl bg-white sm:w-44">
+                  <input
+                    value={promoForm.title}
+                    onChange={(event) =>
+                      setPromoForm((current) => ({
+                        ...current,
+                        title: event.target.value,
+                      }))
+                    }
+                    placeholder="Judul promo"
+                    className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
+                    required
+                  />
+                  <textarea
+                    value={promoForm.description}
+                    onChange={(event) =>
+                      setPromoForm((current) => ({
+                        ...current,
+                        description: event.target.value,
+                      }))
+                    }
+                    placeholder="Deskripsi promo rumah"
+                    className="min-h-32 rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold md:col-span-2"
+                    required
+                  />
+                  <label
+                    htmlFor="promo-image-input"
+                    onDragOver={(event) => {
+                      event.preventDefault();
+                      setPromoDropActive(true);
+                    }}
+                    onDragLeave={() => setPromoDropActive(false)}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      setPromoDropActive(false);
+                      void handlePromoImageUpload(
+                        event.dataTransfer.files?.[0],
+                      );
+                    }}
+                    className={`cursor-pointer rounded-2xl border border-dashed px-4 py-5 text-sm transition md:col-span-2 ${
+                      promoDropActive
+                        ? "border-brand-gold bg-brand-gold/10"
+                        : "border-brand-gold/40 bg-brand-cream/30 hover:border-brand-gold"
+                    }`}
+                  >
+                    <input
+                      id="promo-image-input"
+                      type="file"
+                      accept="image/*"
+                      onChange={(event) => {
+                        void handlePromoImageUpload(event.target.files?.[0]);
+                      }}
+                      className="sr-only"
+                    />
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                      <div className="relative h-32 w-full overflow-hidden rounded-2xl bg-white sm:w-44">
+                        {promoForm.imageUrl ? (
+                          <Image
+                            src={promoForm.imageUrl}
+                            alt={promoForm.title || "Preview gambar promo"}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-brand-gold">
+                            <UploadCloud className="h-10 w-10" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <span className="block font-semibold text-brand-navy">
+                          {uploadingPromoImage
+                            ? "Mengunggah gambar..."
+                            : "Drag & drop gambar promo atau klik untuk upload"}
+                        </span>
+                        <span className="mt-1 block text-brand-navy/60">
+                          {promoImageFileName || promoForm.imageUrl
+                            ? promoImageFileName ||
+                              "Gambar promo sudah siap dipakai."
+                            : "Gambar langsung tampil sebagai preview setelah upload berhasil."}
+                        </span>
+                      </div>
+                    </div>
+                  </label>
+                  <input
+                    value={promoForm.priceLabel}
+                    onChange={(event) =>
+                      setPromoForm((current) => ({
+                        ...current,
+                        priceLabel: event.target.value,
+                      }))
+                    }
+                    placeholder="Label promo, contoh: DP ringan"
+                    className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
+                  />
+                  <input
+                    value={promoForm.businessLabel}
+                    onChange={(event) =>
+                      setPromoForm((current) => ({
+                        ...current,
+                        businessLabel: event.target.value,
+                      }))
+                    }
+                    placeholder="Nilai tambah, contoh: Strategis"
+                    className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
+                  />
+                  <input
+                    value={promoForm.buildingSize}
+                    onChange={(event) =>
+                      setPromoForm((current) => ({
+                        ...current,
+                        buildingSize: event.target.value,
+                      }))
+                    }
+                    placeholder="Luas bangunan"
+                    className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
+                  />
+                  <input
+                    value={promoForm.landSize}
+                    onChange={(event) =>
+                      setPromoForm((current) => ({
+                        ...current,
+                        landSize: event.target.value,
+                      }))
+                    }
+                    placeholder="Luas tanah"
+                    className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
+                  />
+                  <input
+                    value={promoForm.bedrooms}
+                    onChange={(event) =>
+                      setPromoForm((current) => ({
+                        ...current,
+                        bedrooms: event.target.value,
+                      }))
+                    }
+                    placeholder="Jumlah kamar tidur"
+                    className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
+                  />
+                  <input
+                    value={promoForm.bathrooms}
+                    onChange={(event) =>
+                      setPromoForm((current) => ({
+                        ...current,
+                        bathrooms: event.target.value,
+                      }))
+                    }
+                    placeholder="Jumlah kamar mandi"
+                    className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
+                  />
+                  <input
+                    type="number"
+                    value={promoForm.displayOrder}
+                    onChange={(event) =>
+                      setPromoForm((current) => ({
+                        ...current,
+                        displayOrder: event.target.value,
+                      }))
+                    }
+                    placeholder="Urutan tampil"
+                    className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
+                  />
+                  <label className="flex items-center gap-3 rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 text-sm text-brand-navy">
+                    <input
+                      type="checkbox"
+                      checked={promoForm.isPublished}
+                      onChange={(event) =>
+                        setPromoForm((current) => ({
+                          ...current,
+                          isPublished: event.target.checked,
+                        }))
+                      }
+                    />
+                    Tampilkan di website
+                  </label>
+
+                  <div className="flex flex-wrap gap-3 md:col-span-2">
+                    <button
+                      type="submit"
+                      disabled={savingPromo}
+                      className="inline-flex items-center gap-2 rounded-full bg-brand-navy px-5 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white transition hover:bg-brand-navy/92 disabled:opacity-70"
+                    >
+                      {editingPromoId ? (
+                        <Save className="h-4 w-4" />
+                      ) : (
+                        <Plus className="h-4 w-4" />
+                      )}
+                      {savingPromo
+                        ? "Menyimpan..."
+                        : editingPromoId
+                          ? "Update Promo"
+                          : "Tambah Promo"}
+                    </button>
+                    {editingPromoId ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingPromoId(null);
+                          setPromoForm(emptyPromoForm);
+                          setPromoImageFileName("");
+                          setStatusMessage("Mode tambah promo aktif.");
+                        }}
+                        className="rounded-full border border-brand-navy/10 px-5 py-3 text-sm font-medium text-brand-navy"
+                      >
+                        Batal Edit
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+
+                <aside className="lg:sticky lg:top-24">
+                  <div className="overflow-hidden rounded-3xl border border-brand-dark/5 bg-white shadow-lg shadow-brand-navy/5">
+                    <div className="relative aspect-4/3 bg-brand-cream sm:aspect-16/10 lg:aspect-4/3">
                       {promoForm.imageUrl ? (
                         <Image
                           src={promoForm.imageUrl}
-                          alt={promoForm.title || "Preview gambar promo"}
+                          alt={promoForm.title || "Preview promo rumah"}
                           fill
                           className="object-cover"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center text-brand-gold">
-                          <UploadCloud className="h-10 w-10" />
+                        <div className="flex h-full w-full items-center justify-center px-5 text-center text-sm text-brand-navy/50">
+                          Preview gambar promo
                         </div>
                       )}
+                      <div className="absolute inset-0 bg-linear-to-t from-brand-navy/25 via-transparent to-transparent" />
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <span className="block font-semibold text-brand-navy">
-                        {uploadingPromoImage
-                          ? "Mengunggah gambar..."
-                          : "Drag & drop gambar promo atau klik untuk upload"}
-                      </span>
-                      <span className="mt-1 block text-brand-navy/60">
-                        {promoImageFileName || promoForm.imageUrl
-                          ? promoImageFileName || "Gambar promo sudah siap dipakai."
-                          : "Gambar langsung tampil sebagai preview setelah upload berhasil."}
-                      </span>
-                    </div>
-                  </div>
-                </label>
-                <input
-                  value={promoForm.priceLabel}
-                  onChange={(event) =>
-                    setPromoForm((current) => ({ ...current, priceLabel: event.target.value }))
-                  }
-                  placeholder="Label promo, contoh: DP ringan"
-                  className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
-                />
-                <input
-                  value={promoForm.businessLabel}
-                  onChange={(event) =>
-                    setPromoForm((current) => ({ ...current, businessLabel: event.target.value }))
-                  }
-                  placeholder="Nilai tambah, contoh: Strategis"
-                  className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
-                />
-                <input
-                  value={promoForm.buildingSize}
-                  onChange={(event) =>
-                    setPromoForm((current) => ({ ...current, buildingSize: event.target.value }))
-                  }
-                  placeholder="Luas bangunan"
-                  className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
-                />
-                <input
-                  value={promoForm.landSize}
-                  onChange={(event) =>
-                    setPromoForm((current) => ({ ...current, landSize: event.target.value }))
-                  }
-                  placeholder="Luas tanah"
-                  className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
-                />
-                <input
-                  value={promoForm.bedrooms}
-                  onChange={(event) =>
-                    setPromoForm((current) => ({ ...current, bedrooms: event.target.value }))
-                  }
-                  placeholder="Jumlah kamar tidur"
-                  className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
-                />
-                <input
-                  value={promoForm.bathrooms}
-                  onChange={(event) =>
-                    setPromoForm((current) => ({ ...current, bathrooms: event.target.value }))
-                  }
-                  placeholder="Jumlah kamar mandi"
-                  className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
-                />
-                <input
-                  type="number"
-                  value={promoForm.displayOrder}
-                  onChange={(event) =>
-                    setPromoForm((current) => ({ ...current, displayOrder: event.target.value }))
-                  }
-                  placeholder="Urutan tampil"
-                  className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
-                />
-                <label className="flex items-center gap-3 rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 text-sm text-brand-navy">
-                  <input
-                    type="checkbox"
-                    checked={promoForm.isPublished}
-                    onChange={(event) =>
-                      setPromoForm((current) => ({
-                        ...current,
-                        isPublished: event.target.checked,
-                      }))
-                    }
-                  />
-                  Tampilkan di website
-                </label>
-
-                <div className="flex flex-wrap gap-3 md:col-span-2">
-                  <button
-                    type="submit"
-                    disabled={savingPromo}
-                    className="inline-flex items-center gap-2 rounded-full bg-brand-navy px-5 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white transition hover:bg-brand-navy/92 disabled:opacity-70"
-                  >
-                    {editingPromoId ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                    {savingPromo ? "Menyimpan..." : editingPromoId ? "Update Promo" : "Tambah Promo"}
-                  </button>
-                  {editingPromoId ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingPromoId(null);
-                        setPromoForm(emptyPromoForm);
-                        setPromoImageFileName("");
-                        setStatusMessage("Mode tambah promo aktif.");
-                      }}
-                      className="rounded-full border border-brand-navy/10 px-5 py-3 text-sm font-medium text-brand-navy"
-                    >
-                      Batal Edit
-                    </button>
-                  ) : null}
-                </div>
-
-                <div className="overflow-hidden rounded-3xl border border-brand-dark/5 bg-white shadow-lg shadow-brand-navy/5 md:col-span-2">
-                  <div className="relative aspect-4/3 bg-brand-cream">
-                    {promoForm.imageUrl ? (
-                      <Image
-                        src={promoForm.imageUrl}
-                        alt={promoForm.title || "Preview promo rumah"}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-sm text-brand-navy/50">
-                        Preview gambar promo
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-linear-to-t from-brand-navy/25 via-transparent to-transparent" />
-                  </div>
-                  <div className="p-5">
-                    <div className="mb-3 flex flex-wrap items-center gap-2">
-                      <span className="text-xs font-bold uppercase tracking-[0.25em] text-brand-gold">
-                        {promoForm.category || "Kategori Promo"}
-                      </span>
-                      {promoForm.priceLabel ? (
-                        <span className="inline-flex items-center gap-2 rounded-full bg-brand-gold/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-brand-navy">
-                          <BadgePercent className="h-3.5 w-3.5 text-brand-gold" />
-                          {promoForm.priceLabel}
+                    <div className="p-5 sm:p-6">
+                      <div className="mb-3 flex flex-wrap items-center gap-2">
+                        <span className="text-xs font-bold uppercase tracking-[0.25em] text-brand-gold">
+                          {promoForm.category || "Kategori Promo"}
                         </span>
-                      ) : null}
-                    </div>
-                    <h3 className="text-2xl text-brand-navy">
-                      {promoForm.title || "Judul promo rumah"}
-                    </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-brand-navy/65">
-                      {promoForm.description || "Deskripsi promo akan tampil di sini."}
-                    </p>
-                    {promoPreviewStats.length || promoForm.businessLabel ? (
-                      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                        {promoPreviewStats.map((item) => {
-                          const Icon = item.icon;
-
-                          return (
-                            <div
-                              key={item.label}
-                              className="rounded-2xl border border-brand-dark/5 bg-brand-cream/60 p-3"
-                            >
-                              <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-white text-brand-gold">
-                                <Icon className="h-4 w-4" />
-                              </div>
-                              <span className="block font-bold text-brand-navy">{item.value}</span>
-                              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-navy/55">
-                                {item.label}
-                              </span>
-                            </div>
-                          );
-                        })}
-                        {promoForm.businessLabel ? (
-                          <div className="rounded-2xl bg-brand-navy p-3 text-white">
-                            <span className="block font-bold">{promoForm.businessLabel}</span>
-                            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/70">
-                              Nilai Tambah
-                            </span>
-                          </div>
+                        {promoForm.priceLabel ? (
+                          <span className="inline-flex items-center gap-2 rounded-full bg-brand-gold/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-brand-navy">
+                            <BadgePercent className="h-3.5 w-3.5 text-brand-gold" />
+                            {promoForm.priceLabel}
+                          </span>
                         ) : null}
                       </div>
-                    ) : null}
+                      <h3 className="text-xl text-brand-navy sm:text-2xl">
+                        {promoForm.title || "Judul promo rumah"}
+                      </h3>
+                      <p className="mt-2 text-sm leading-relaxed text-brand-navy/65">
+                        {promoForm.description ||
+                          "Deskripsi promo akan tampil di sini."}
+                      </p>
+                      {promoPreviewStats.length || promoForm.businessLabel ? (
+                        <div className="mt-4 grid grid-cols-2 gap-3">
+                          {promoPreviewStats.map((item) => {
+                            const Icon = item.icon;
+
+                            return (
+                              <div
+                                key={item.label}
+                                className="rounded-2xl border border-brand-dark/5 bg-brand-cream/60 p-3"
+                              >
+                                <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-white text-brand-gold">
+                                  <Icon className="h-4 w-4" />
+                                </div>
+                                <span className="block font-bold text-brand-navy">
+                                  {item.value}
+                                </span>
+                                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-navy/55">
+                                  {item.label}
+                                </span>
+                              </div>
+                            );
+                          })}
+                          {promoForm.businessLabel ? (
+                            <div className="rounded-2xl bg-brand-navy p-3 text-white">
+                              <span className="block font-bold">
+                                {promoForm.businessLabel}
+                              </span>
+                              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/70">
+                                Nilai Tambah
+                              </span>
+                            </div>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </div>
                   </div>
-                </div>
+                </aside>
               </form>
             </div>
+          </section>
 
+          <section>
             <div className="rounded-[2rem] border border-white/80 bg-white p-6 shadow-xl shadow-brand-navy/5 sm:p-8">
               <div className="mb-6 flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-gold/10 text-brand-gold">
                   <ImagePlus className="h-6 w-6" />
                 </div>
                 <div>
-                  <h2 className="text-2xl text-brand-navy">Upload Gambar Galeri</h2>
+                  <h2 className="text-2xl text-brand-navy">
+                    Upload Gambar Galeri
+                  </h2>
                   <p className="text-sm text-brand-navy/60">
                     Gambar baru akan masuk ke halaman galeri secara otomatis.
                   </p>
                 </div>
               </div>
 
-              <form onSubmit={handleGallerySubmit} className="grid gap-4 md:grid-cols-2">
+              <form
+                onSubmit={handleGallerySubmit}
+                className="grid gap-4 md:grid-cols-2"
+              >
                 <input
                   value={galleryForm.title}
                   onChange={(event) =>
-                    setGalleryForm((current) => ({ ...current, title: event.target.value }))
+                    setGalleryForm((current) => ({
+                      ...current,
+                      title: event.target.value,
+                    }))
                   }
                   placeholder="Judul gambar"
                   className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
@@ -644,7 +721,9 @@ export default function DashboardPage() {
                   className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
                 />
                 <label className="md:col-span-2 rounded-2xl border border-dashed border-brand-gold/40 bg-brand-cream/30 px-4 py-5 text-sm text-brand-navy/70">
-                  <span className="mb-2 block font-medium text-brand-navy">Pilih file gambar</span>
+                  <span className="mb-2 block font-medium text-brand-navy">
+                    Pilih file gambar
+                  </span>
                   <input
                     id="gallery-image-input"
                     type="file"
@@ -686,10 +765,14 @@ export default function DashboardPage() {
 
           <section className="space-y-8">
             <div className="rounded-[2rem] border border-white/80 bg-white p-6 shadow-xl shadow-brand-navy/5 sm:p-8">
-              <h2 className="mb-6 text-2xl text-brand-navy">Daftar Promo Aktif</h2>
+              <h2 className="mb-6 text-2xl text-brand-navy">
+                Daftar Promo Aktif
+              </h2>
               <div className="space-y-4">
                 {loading ? (
-                  <p className="text-sm text-brand-navy/60">Memuat data promo...</p>
+                  <p className="text-sm text-brand-navy/60">
+                    Memuat data promo...
+                  </p>
                 ) : promos.length ? (
                   promos.map((promo) => (
                     <div
@@ -711,7 +794,9 @@ export default function DashboardPage() {
                               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-gold">
                                 {promo.category}
                               </p>
-                              <h3 className="mt-2 text-xl text-brand-navy">{promo.title}</h3>
+                              <h3 className="mt-2 text-xl text-brand-navy">
+                                {promo.title}
+                              </h3>
                             </div>
                             <div className="rounded-full bg-white px-3 py-1 text-xs font-medium text-brand-navy/60">
                               Urutan {promo.displayOrder}
@@ -765,7 +850,9 @@ export default function DashboardPage() {
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-brand-navy/60">Belum ada promo tambahan.</p>
+                  <p className="text-sm text-brand-navy/60">
+                    Belum ada promo tambahan.
+                  </p>
                 )}
               </div>
             </div>
@@ -774,7 +861,9 @@ export default function DashboardPage() {
               <h2 className="mb-6 text-2xl text-brand-navy">Galeri Website</h2>
               <div className="grid gap-4 sm:grid-cols-2">
                 {loading ? (
-                  <p className="text-sm text-brand-navy/60">Memuat gambar galeri...</p>
+                  <p className="text-sm text-brand-navy/60">
+                    Memuat gambar galeri...
+                  </p>
                 ) : galleryImages.length ? (
                   galleryImages.map((image) => (
                     <div
@@ -790,7 +879,9 @@ export default function DashboardPage() {
                         />
                       </div>
                       <div className="p-4">
-                        <h3 className="text-lg text-brand-navy">{image.title}</h3>
+                        <h3 className="text-lg text-brand-navy">
+                          {image.title}
+                        </h3>
                         <p className="mt-1 text-xs uppercase tracking-[0.25em] text-brand-gold">
                           Urutan {image.displayOrder}
                         </p>
@@ -806,7 +897,9 @@ export default function DashboardPage() {
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-brand-navy/60">Belum ada gambar tambahan.</p>
+                  <p className="text-sm text-brand-navy/60">
+                    Belum ada gambar tambahan.
+                  </p>
                 )}
               </div>
             </div>

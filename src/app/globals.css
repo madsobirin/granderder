@@ -15,7 +15,7 @@
   html {
     scroll-behavior: smooth;
   }
-  
+
   body {
     @apply bg-brand-cream text-brand-dark font-sans antialiased;
   }
