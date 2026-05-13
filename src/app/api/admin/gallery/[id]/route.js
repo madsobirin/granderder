@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 
 export async function DELETE(_request, { params }) {
   const { unauthorized } = await requireAdmin();

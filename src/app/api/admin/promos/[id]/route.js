@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 
 function parseNullableInteger(value) {
   if (value === null || value === undefined || value === "") {

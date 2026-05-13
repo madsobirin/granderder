@@ -11,7 +11,9 @@ export async function saveImageFile(file) {
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
   const extension = path.extname(file.name || "") || ".jpg";
-  const baseName = sanitizeFileName(path.basename(file.name || "image", extension));
+  const baseName = sanitizeFileName(
+    path.basename(file.name || "image", extension),
+  );
   const fileName = `${Date.now()}-${baseName}${extension}`;
 
   await mkdir(uploadDirectory, { recursive: true });

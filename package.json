@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@iconify/react": "^6.0.2",
-    "@prisma/adapter-mariadb": "^6",
+    "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^6",
     "bcryptjs": "^3.0.3",
     "dotenv": "^16",
@@ -20,12 +20,14 @@
     "lucide-react": "^1.14.0",
     "motion": "^12.23.24",
     "next": "16.2.5",
+    "pg": "^8.20.0",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^22",
+    "@types/pg": "^8.20.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.5",
     "prisma": "^6",

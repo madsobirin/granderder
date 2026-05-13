@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 async function main() {
   const hashedPassword = await bcrypt.hash("123456", 10);
 
-  await prisma.user.create({
+  const data1 = await prisma.user.create({
     data: {
       email: "admin@gmail.com",
       password: hashedPassword,
@@ -14,6 +14,7 @@ async function main() {
   });
 
   console.log("Admin berhasil dibuat");
+  console.log(data1);
 }
 
 main()

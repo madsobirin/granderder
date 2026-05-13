@@ -1,21 +1,15 @@
-import { PrismaClient } from "@/generated/prisma";
+import { Client } from "pg";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient } from "../generated/prisma"; // Sesuaikan jalur ke folder output generator kamu
 
+const prismaClientSingleton = () => {
+  return new PrismaClient();
+};
 const globalForPrisma = globalThis;
 
-function createPrismaClient() {
-  return new PrismaClient();
-}
+const prisma = globalForPrisma.prismaGlobal ?? prismaClientSingleton();
 
-function hasContentModels(client) {
-  return Boolean(client?.promo) && Boolean(client?.galleryImage);
-}
+export default prisma;
 
-const cachedPrisma = globalForPrisma.prisma;
-
-export const prisma = hasContentModels(cachedPrisma)
-  ? cachedPrisma
-  : createPrismaClient();
-
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
-}
+if (process.env.NODE_ENV !== "production")
+  globalForPrisma.prismaGlobal = prisma;

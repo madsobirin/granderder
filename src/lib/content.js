@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import {
   defaultGalleryImages,
   defaultPromos,
@@ -24,7 +24,9 @@ export async function getSiteContent() {
         ? promos.map((promo, index) => normalizePromo(promo, index))
         : defaultPromos,
       galleryImages: galleryImages.length
-        ? galleryImages.map((image, index) => normalizeGalleryImage(image, index))
+        ? galleryImages.map((image, index) =>
+            normalizeGalleryImage(image, index),
+          )
         : defaultGalleryImages,
     };
   } catch {
