@@ -1,11 +1,6 @@
 import { mkdir, readFile, writeFile } from "fs/promises";
 import path from "path";
-import {
-  defaultGalleryImages,
-  defaultPromos,
-  normalizeGalleryImage,
-  normalizePromo,
-} from "@/lib/default-content";
+import { normalizeGalleryImage, normalizePromo } from "@/lib/default-content";
 
 const dataDirectory = path.join(process.cwd(), "src", "data");
 const dataFilePath = path.join(dataDirectory, "site-content.json");
@@ -46,11 +41,9 @@ export async function getStoredSiteContent() {
   const content = await readContentStore();
 
   return {
-    promos: content.promos.length
-      ? content.promos.map((promo, index) => normalizePromo(promo, index))
-      : defaultPromos,
-    galleryImages: content.galleryImages.length
-      ? content.galleryImages.map((image, index) => normalizeGalleryImage(image, index))
-      : defaultGalleryImages,
+    promos: content.promos.map((promo, index) => normalizePromo(promo, index)),
+    galleryImages: content.galleryImages.map((image, index) =>
+      normalizeGalleryImage(image, index),
+    ),
   };
 }

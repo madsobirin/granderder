@@ -3,12 +3,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
-import { defaultGalleryImages } from "@/lib/default-content";
+import { X, ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
 
-const Gallery = ({ images = defaultGalleryImages }) => {
+const Gallery = ({ images = [] }) => {
   const [selectedImage, setSelectedImage] = useState(null);
-  const galleryItems = images.length ? images : defaultGalleryImages;
+  const galleryItems = images;
 
   useEffect(() => {
     if (selectedImage !== null) {
@@ -78,35 +77,71 @@ const Gallery = ({ images = defaultGalleryImages }) => {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {galleryItems.map((image, index) => (
-            <motion.div
-              key={image.id ?? index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: (index % 4) * 0.1 }}
-              whileHover={{ y: -10 }}
-              onClick={() => setSelectedImage(index)}
-              className="aspect-square rounded-3xl overflow-hidden shadow-xl cursor-pointer group"
-            >
-              <div className="relative w-full h-full">
-                <Image
-                  src={image.imageUrl}
-                  alt={image.title || `Gallery ${index + 1}`}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                  width={600}
-                  height={600}
-                />
-                <div className="absolute inset-0 bg-brand-navy/0 group-hover:bg-brand-navy/20 transition-colors duration-500 flex items-center justify-center">
-                  <div className="bg-white/90 text-brand-navy px-4 py-2 rounded-full font-medium text-sm opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 shadow-lg">
-                    Lihat Detail
-                  </div>
+        {galleryItems.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.6 }}
+            className="flex flex-col items-center justify-center py-20"
+          >
+            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-brand-gold/10">
+              <ImageOff className="h-10 w-10 text-brand-gold" />
+            </div>
+            <h3 className="text-2xl md:text-3xl font-serif text-brand-navy mb-3">
+              Belum Ada Foto Gallery
+            </h3>
+            <p className="text-brand-navy/60 text-center max-w-md">
+              Silakan upload foto proyek dan rumah contoh melalui dashboard
+              admin untuk ditampilkan di sini.
+            </p>
+          </motion.div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {galleryItems.map((image, index) => (
+              <motion.div
+                key={image.id ?? index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, delay: (index % 4) * 0.1 }}
+                sizes="(max-width: 768px) 100vw, 25vw"
+                whileHover={{ y: -10 }}
+                onClick={() => image.imageUrl && setSelectedImage(index)}
+                className={`aspect-square rounded-3xl overflow-hidden shadow-xl ${image.imageUrl ? "cursor-pointer group" : "bg-brand-cream/50"}`}
+              >
+                <div className="relative w-full h-full">
+                  {image.imageUrl ? (
+                    <>
+                      <Image
+                        src={image.imageUrl}
+                        alt={image.title || `Gallery ${index + 1}`}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        width={600}
+                        height={600}
+                      />
+                      <div className="absolute inset-0 bg-brand-navy/0 group-hover:bg-brand-navy/20 transition-colors duration-500 flex items-center justify-center">
+                        <div className="bg-white/90 text-brand-navy px-4 py-2 rounded-full font-medium text-sm opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 shadow-lg">
+                          Lihat Detail
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center text-center p-4">
+                      <div className="text-4xl mb-2">📸</div>
+                      <p className="text-sm font-semibold text-brand-navy">
+                        Belum ada gambar
+                      </p>
+                      <p className="text-xs text-brand-navy/60 mt-1">
+                        {image.title || "Gallery"}
+                      </p>
+                    </div>
+                  )}
                 </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
 
       <AnimatePresence>

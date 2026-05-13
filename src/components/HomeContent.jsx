@@ -10,11 +10,10 @@ import PersyaratanKPRSection from "@/components/PersyaratanKPRSection";
 import Gallery from "@/components/Gallery";
 import CTA from "@/components/CTA";
 import Footer from "@/components/Footer";
-import { defaultGalleryImages, defaultPromos } from "@/lib/default-content";
 
 export default function HomeContent() {
-  const [promos, setPromos] = useState(defaultPromos);
-  const [galleryImages, setGalleryImages] = useState(defaultGalleryImages);
+  const [promos, setPromos] = useState([]);
+  const [galleryImages, setGalleryImages] = useState([]);
 
   useEffect(() => {
     async function loadContent() {
@@ -25,14 +24,13 @@ export default function HomeContent() {
         const data = await response.json();
 
         if (data.success) {
-          setPromos(data.promos?.length ? data.promos : defaultPromos);
-          setGalleryImages(
-            data.galleryImages?.length ? data.galleryImages : defaultGalleryImages,
-          );
+          setPromos(data.promos || []);
+          setGalleryImages(data.galleryImages || []);
         }
-      } catch {
-        setPromos(defaultPromos);
-        setGalleryImages(defaultGalleryImages);
+      } catch (error) {
+        console.error("Failed to load content:", error);
+        setPromos([]);
+        setGalleryImages([]);
       }
     }
 
