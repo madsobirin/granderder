@@ -48,13 +48,27 @@ export const defaultGalleryImages = [
   displayOrder: index,
 }));
 
+function sanitizeImageUrl(url, defaultUrl) {
+  if (!url) return defaultUrl;
+  let cleanUrl = url.trim();
+  // hapus prefix public/ atau public\ jika ada
+  if (cleanUrl.startsWith("public/") || cleanUrl.startsWith("public\\")) {
+    cleanUrl = cleanUrl.substring(6);
+  }
+  // pastikan ada leading slash kalau bukan http
+  if (!cleanUrl.startsWith("/") && !cleanUrl.startsWith("http")) {
+    cleanUrl = "/" + cleanUrl;
+  }
+  return cleanUrl;
+}
+
 export function normalizePromo(promo, index = 0) {
   return {
     id: promo.id,
     category: promo.category || "Promo Unit",
     title: promo.title || "Unit Baru",
     description: promo.description || "",
-    imageUrl: promo.imageUrl || "/images/6Home.jpeg",
+    imageUrl: sanitizeImageUrl(promo.imageUrl, "/images/6Home.jpeg"),
     priceLabel: promo.priceLabel || "",
     buildingSize: promo.buildingSize || "",
     landSize: promo.landSize || "",
@@ -70,7 +84,7 @@ export function normalizeGalleryImage(image, index = 0) {
   return {
     id: image.id,
     title: image.title || `Galeri ${index + 1}`,
-    imageUrl: image.imageUrl || "/images/5Home.jpeg",
+    imageUrl: sanitizeImageUrl(image.imageUrl, "/images/5Home.jpeg"),
     isPublished: image.isPublished ?? true,
     displayOrder: image.displayOrder ?? index,
   };

@@ -5,13 +5,19 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
   ArrowUpRight,
+  Bath,
+  BadgePercent,
+  BedDouble,
+  Building2,
   ImagePlus,
+  LandPlot,
   LayoutGrid,
   LogOut,
   PencilLine,
   Plus,
   Save,
   Trash2,
+  UploadCloud,
 } from "lucide-react";
 
 const emptyPromoForm = {
@@ -48,7 +54,35 @@ export default function DashboardPage() {
   const [galleryForm, setGalleryForm] = useState(emptyGalleryForm);
   const [editingPromoId, setEditingPromoId] = useState(null);
   const [statusMessage, setStatusMessage] = useState("");
-  const [promoImageFile, setPromoImageFile] = useState(null);
+  const [promoDropActive, setPromoDropActive] = useState(false);
+  const [promoImageFileName, setPromoImageFileName] = useState("");
+
+  const promoPreviewStats = useMemo(
+    () =>
+      [
+        {
+          label: "Luas Bangunan",
+          value: promoForm.buildingSize,
+          icon: Building2,
+        },
+        {
+          label: "Luas Tanah",
+          value: promoForm.landSize,
+          icon: LandPlot,
+        },
+        {
+          label: "Kamar Tidur",
+          value: promoForm.bedrooms,
+          icon: BedDouble,
+        },
+        {
+          label: "Kamar Mandi",
+          value: promoForm.bathrooms,
+          icon: Bath,
+        },
+      ].filter((item) => item.value !== null && item.value !== undefined && item.value !== ""),
+    [promoForm.bathrooms, promoForm.bedrooms, promoForm.buildingSize, promoForm.landSize],
+  );
 
   const stats = useMemo(
     () => [
@@ -109,6 +143,12 @@ export default function DashboardPage() {
 
   const handlePromoSubmit = async (event) => {
     event.preventDefault();
+
+    if (!promoForm.imageUrl) {
+      setStatusMessage("Upload gambar promo dulu sebelum menyimpan.");
+      return;
+    }
+
     setSavingPromo(true);
 
     const endpoint = editingPromoId
@@ -129,6 +169,7 @@ export default function DashboardPage() {
     if (data.success) {
       setStatusMessage(data.message);
       setPromoForm(emptyPromoForm);
+      setPromoImageFileName("");
       setEditingPromoId(null);
       await loadDashboardData();
     } else {
@@ -154,6 +195,7 @@ export default function DashboardPage() {
       displayOrder: promo.displayOrder ?? 0,
       isPublished: promo.isPublished ?? true,
     });
+    setPromoImageFileName("");
     setStatusMessage("Mode edit promo aktif.");
   };
 
@@ -199,39 +241,48 @@ export default function DashboardPage() {
     setUploadingImage(false);
   };
 
-  const handlePromoImageUpload = async () => {
-    if (!promoImageFile) {
+  const handlePromoImageUpload = async (file) => {
+    if (!file) {
       setStatusMessage("Pilih file gambar promo dulu.");
       return;
     }
 
+    if (!file.type.startsWith("image/")) {
+      setStatusMessage("File promo harus berupa gambar.");
+      return;
+    }
+
     setUploadingPromoImage(true);
+    setPromoImageFileName(file.name);
 
     const formData = new FormData();
-    formData.append("image", promoImageFile);
+    formData.append("image", file);
 
-    const response = await fetch("/api/admin/uploads", {
-      method: "POST",
-      body: formData,
-    });
-    const data = await response.json();
+    try {
+      const response = await fetch("/api/admin/uploads", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
 
-    if (data.success) {
-      setPromoForm((current) => ({
-        ...current,
-        imageUrl: data.imageUrl,
-      }));
-      setStatusMessage("Foto promo berhasil diunggah dan URL sudah terisi.");
-      setPromoImageFile(null);
+      if (data.success) {
+        setPromoForm((current) => ({
+          ...current,
+          imageUrl: data.imageUrl,
+        }));
+        setStatusMessage("Foto promo berhasil diunggah.");
+      } else {
+        setStatusMessage(data.message || "Upload gambar promo gagal.");
+      }
+    } catch {
+      setStatusMessage("Upload gambar promo gagal.");
+    } finally {
       const input = document.getElementById("promo-image-input");
       if (input) {
         input.value = "";
       }
-    } else {
-      setStatusMessage(data.message || "Upload gambar promo gagal.");
+      setUploadingPromoImage(false);
     }
-
-    setUploadingPromoImage(false);
   };
 
   const handleDeleteImage = async (id) => {
@@ -336,38 +387,62 @@ export default function DashboardPage() {
                   className="min-h-32 rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold md:col-span-2"
                   required
                 />
-                <input
-                  value={promoForm.imageUrl}
-                  onChange={(event) =>
-                    setPromoForm((current) => ({ ...current, imageUrl: event.target.value }))
-                  }
-                  placeholder="URL gambar, contoh: /uploads/nama-file.jpg"
-                  className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold md:col-span-2"
-                  required
-                />
-                <div className="rounded-2xl border border-dashed border-brand-gold/40 bg-brand-cream/30 px-4 py-4 md:col-span-2">
-                  <span className="mb-2 block text-sm font-medium text-brand-navy">
-                    Atau upload gambar promo langsung
-                  </span>
-                  <div className="flex flex-col gap-3 md:flex-row">
-                    <input
-                      id="promo-image-input"
-                      type="file"
-                      accept="image/*"
-                      onChange={(event) => setPromoImageFile(event.target.files?.[0] || null)}
-                      className="block w-full text-sm text-brand-navy/70"
-                    />
-                    <button
-                      type="button"
-                      onClick={handlePromoImageUpload}
-                      disabled={uploadingPromoImage}
-                      className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-gold px-4 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-brand-gold/90 disabled:opacity-70"
-                    >
-                      <ImagePlus className="h-4 w-4" />
-                      {uploadingPromoImage ? "Upload..." : "Upload Foto Promo"}
-                    </button>
+                <label
+                  htmlFor="promo-image-input"
+                  onDragOver={(event) => {
+                    event.preventDefault();
+                    setPromoDropActive(true);
+                  }}
+                  onDragLeave={() => setPromoDropActive(false)}
+                  onDrop={(event) => {
+                    event.preventDefault();
+                    setPromoDropActive(false);
+                    void handlePromoImageUpload(event.dataTransfer.files?.[0]);
+                  }}
+                  className={`cursor-pointer rounded-2xl border border-dashed px-4 py-5 text-sm transition md:col-span-2 ${
+                    promoDropActive
+                      ? "border-brand-gold bg-brand-gold/10"
+                      : "border-brand-gold/40 bg-brand-cream/30 hover:border-brand-gold"
+                  }`}
+                >
+                  <input
+                    id="promo-image-input"
+                    type="file"
+                    accept="image/*"
+                    onChange={(event) => {
+                      void handlePromoImageUpload(event.target.files?.[0]);
+                    }}
+                    className="sr-only"
+                  />
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                    <div className="relative h-32 w-full overflow-hidden rounded-2xl bg-white sm:w-44">
+                      {promoForm.imageUrl ? (
+                        <Image
+                          src={promoForm.imageUrl}
+                          alt={promoForm.title || "Preview gambar promo"}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-brand-gold">
+                          <UploadCloud className="h-10 w-10" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="block font-semibold text-brand-navy">
+                        {uploadingPromoImage
+                          ? "Mengunggah gambar..."
+                          : "Drag & drop gambar promo atau klik untuk upload"}
+                      </span>
+                      <span className="mt-1 block text-brand-navy/60">
+                        {promoImageFileName || promoForm.imageUrl
+                          ? promoImageFileName || "Gambar promo sudah siap dipakai."
+                          : "Gambar langsung tampil sebagai preview setelah upload berhasil."}
+                      </span>
+                    </div>
                   </div>
-                </div>
+                </label>
                 <input
                   value={promoForm.priceLabel}
                   onChange={(event) =>
@@ -454,6 +529,7 @@ export default function DashboardPage() {
                       onClick={() => {
                         setEditingPromoId(null);
                         setPromoForm(emptyPromoForm);
+                        setPromoImageFileName("");
                         setStatusMessage("Mode tambah promo aktif.");
                       }}
                       className="rounded-full border border-brand-navy/10 px-5 py-3 text-sm font-medium text-brand-navy"
@@ -461,6 +537,73 @@ export default function DashboardPage() {
                       Batal Edit
                     </button>
                   ) : null}
+                </div>
+
+                <div className="overflow-hidden rounded-3xl border border-brand-dark/5 bg-white shadow-lg shadow-brand-navy/5 md:col-span-2">
+                  <div className="relative aspect-4/3 bg-brand-cream">
+                    {promoForm.imageUrl ? (
+                      <Image
+                        src={promoForm.imageUrl}
+                        alt={promoForm.title || "Preview promo rumah"}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-sm text-brand-navy/50">
+                        Preview gambar promo
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-linear-to-t from-brand-navy/25 via-transparent to-transparent" />
+                  </div>
+                  <div className="p-5">
+                    <div className="mb-3 flex flex-wrap items-center gap-2">
+                      <span className="text-xs font-bold uppercase tracking-[0.25em] text-brand-gold">
+                        {promoForm.category || "Kategori Promo"}
+                      </span>
+                      {promoForm.priceLabel ? (
+                        <span className="inline-flex items-center gap-2 rounded-full bg-brand-gold/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-brand-navy">
+                          <BadgePercent className="h-3.5 w-3.5 text-brand-gold" />
+                          {promoForm.priceLabel}
+                        </span>
+                      ) : null}
+                    </div>
+                    <h3 className="text-2xl text-brand-navy">
+                      {promoForm.title || "Judul promo rumah"}
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-brand-navy/65">
+                      {promoForm.description || "Deskripsi promo akan tampil di sini."}
+                    </p>
+                    {promoPreviewStats.length || promoForm.businessLabel ? (
+                      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                        {promoPreviewStats.map((item) => {
+                          const Icon = item.icon;
+
+                          return (
+                            <div
+                              key={item.label}
+                              className="rounded-2xl border border-brand-dark/5 bg-brand-cream/60 p-3"
+                            >
+                              <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-white text-brand-gold">
+                                <Icon className="h-4 w-4" />
+                              </div>
+                              <span className="block font-bold text-brand-navy">{item.value}</span>
+                              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-navy/55">
+                                {item.label}
+                              </span>
+                            </div>
+                          );
+                        })}
+                        {promoForm.businessLabel ? (
+                          <div className="rounded-2xl bg-brand-navy p-3 text-white">
+                            <span className="block font-bold">{promoForm.businessLabel}</span>
+                            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/70">
+                              Nilai Tambah
+                            </span>
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </div>
                 </div>
               </form>
             </div>
@@ -551,39 +694,73 @@ export default function DashboardPage() {
                   promos.map((promo) => (
                     <div
                       key={promo.id}
-                      className="rounded-3xl border border-brand-dark/5 bg-brand-cream/40 p-5"
+                      className="overflow-hidden rounded-3xl border border-brand-dark/5 bg-brand-cream/40"
                     >
-                      <div className="mb-4 flex items-start justify-between gap-4">
-                        <div>
-                          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-gold">
-                            {promo.category}
+                      <div className="grid gap-0 md:grid-cols-[180px_1fr]">
+                        <div className="relative aspect-4/3 bg-white md:aspect-auto">
+                          <Image
+                            src={promo.imageUrl}
+                            alt={promo.title}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <div className="p-5">
+                          <div className="mb-4 flex items-start justify-between gap-4">
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-gold">
+                                {promo.category}
+                              </p>
+                              <h3 className="mt-2 text-xl text-brand-navy">{promo.title}</h3>
+                            </div>
+                            <div className="rounded-full bg-white px-3 py-1 text-xs font-medium text-brand-navy/60">
+                              Urutan {promo.displayOrder}
+                            </div>
+                          </div>
+                          <p className="mb-3 text-sm leading-relaxed text-brand-navy/65">
+                            {promo.description}
                           </p>
-                          <h3 className="mt-2 text-xl text-brand-navy">{promo.title}</h3>
+                          <div className="mb-4 flex flex-wrap gap-2">
+                            {promo.priceLabel ? (
+                              <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-brand-navy">
+                                {promo.priceLabel}
+                              </span>
+                            ) : null}
+                            {promo.buildingSize ? (
+                              <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-brand-navy/70">
+                                LB {promo.buildingSize}
+                              </span>
+                            ) : null}
+                            {promo.landSize ? (
+                              <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-brand-navy/70">
+                                LT {promo.landSize}
+                              </span>
+                            ) : null}
+                            {!promo.isPublished ? (
+                              <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-medium text-red-600">
+                                Draft
+                              </span>
+                            ) : null}
+                          </div>
+                          <div className="flex flex-wrap gap-3">
+                            <button
+                              type="button"
+                              onClick={() => handleEditPromo(promo)}
+                              className="inline-flex items-center gap-2 rounded-full border border-brand-navy/10 bg-white px-4 py-2 text-sm font-medium text-brand-navy"
+                            >
+                              <PencilLine className="h-4 w-4" />
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeletePromo(promo.id)}
+                              className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              Hapus
+                            </button>
+                          </div>
                         </div>
-                        <div className="rounded-full bg-white px-3 py-1 text-xs font-medium text-brand-navy/60">
-                          Urutan {promo.displayOrder}
-                        </div>
-                      </div>
-                      <p className="mb-4 text-sm leading-relaxed text-brand-navy/65">
-                        {promo.description}
-                      </p>
-                      <div className="flex flex-wrap gap-3">
-                        <button
-                          type="button"
-                          onClick={() => handleEditPromo(promo)}
-                          className="inline-flex items-center gap-2 rounded-full border border-brand-navy/10 bg-white px-4 py-2 text-sm font-medium text-brand-navy"
-                        >
-                          <PencilLine className="h-4 w-4" />
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDeletePromo(promo.id)}
-                          className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          Hapus
-                        </button>
                       </div>
                     </div>
                   ))
