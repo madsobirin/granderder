@@ -21,7 +21,7 @@ export default function PromoForm({
   onCancelEdit,
 }) {
   return (
-    <section className="xl:col-span-2">
+    <section>
       <div className="rounded-[2rem] border border-white/80 bg-white p-6 shadow-xl shadow-brand-navy/5 sm:p-8">
         <div className="mb-6 flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-gold/10 text-brand-gold">
@@ -37,7 +37,7 @@ export default function PromoForm({
 
         <form
           onSubmit={onSubmit}
-          className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.82fr)] lg:items-start"
+          className="grid gap-6 2xl:grid-cols-[minmax(0,1fr)_380px] 2xl:items-start"
         >
           <div>
             <PromoFormFields

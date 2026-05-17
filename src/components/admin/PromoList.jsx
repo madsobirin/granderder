@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { PencilLine, Trash2 } from "lucide-react";
+import { LayoutTemplate, PencilLine, Trash2 } from "lucide-react";
 
 export default function PromoList({ promos, loading, onEdit, onDelete }) {
   return (
@@ -86,9 +86,16 @@ export default function PromoList({ promos, loading, onEdit, onDelete }) {
               </div>
             ))
           ) : (
-            <p className="text-sm text-brand-navy/60">
-              Belum ada promo tambahan.
-            </p>
+            <div className="flex min-h-72 flex-col items-center justify-center rounded-[1.8rem] border border-dashed border-brand-gold/25 bg-brand-cream/35 px-6 py-10 text-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-brand-gold shadow-sm">
+                <LayoutTemplate className="h-7 w-7" />
+              </div>
+              <h3 className="mt-5 text-2xl text-brand-navy">Belum ada promo aktif</h3>
+              <p className="mt-3 max-w-md text-sm leading-7 text-brand-navy/60">
+                Setelah kamu menambahkan promo rumah dari form di atas, daftar konten
+                aktif akan muncul rapi di area ini.
+              </p>
+            </div>
           )}
         </div>
       </div>

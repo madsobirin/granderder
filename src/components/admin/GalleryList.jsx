@@ -15,9 +15,9 @@ export default function GalleryList({ galleryImages, loading, onDelete }) {
             galleryImages.map((image) => (
               <div
                 key={image.id}
-                className="overflow-hidden rounded-3xl border border-brand-dark/5 bg-brand-cream/40"
+                className="overflow-hidden rounded-3xl border border-brand-dark/5 bg-brand-cream/40 shadow-sm"
               >
-                <div className="relative aspect-square">
+                <div className="relative aspect-[4/3]">
                   <Image
                     src={image.imageUrl}
                     alt={image.title}

@@ -2,7 +2,17 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Bath, BedDouble, Building2, LandPlot } from "lucide-react";
+import {
+  Bath,
+  BedDouble,
+  Building2,
+  FileImage,
+  Images,
+  LandPlot,
+  LayoutDashboard,
+  MessageSquareQuote,
+  Sparkles,
+} from "lucide-react";
 import DashboardHeader from "@/components/admin/DashboardHeader";
 import DashboardStats from "@/components/admin/DashboardStats";
 import StatusMessage from "@/components/admin/StatusMessage";
@@ -93,6 +103,42 @@ export default function DashboardPage() {
       },
     ],
     [galleryImages.length, promos],
+  );
+
+  const sidebarItems = useMemo(
+    () => [
+      {
+        id: "ringkasan",
+        label: "Ringkasan",
+        caption: "Statistik dan overview",
+        icon: LayoutDashboard,
+      },
+      {
+        id: "promo-editor",
+        label: "Promo Rumah",
+        caption: "Kelola kartu promosi",
+        icon: Sparkles,
+      },
+      {
+        id: "gallery-editor",
+        label: "Galeri",
+        caption: "Upload foto terbaru",
+        icon: Images,
+      },
+      {
+        id: "promo-list",
+        label: "Daftar Promo",
+        caption: "Edit konten yang tayang",
+        icon: MessageSquareQuote,
+      },
+      {
+        id: "gallery-list",
+        label: "Daftar Galeri",
+        caption: "Lihat semua gambar",
+        icon: FileImage,
+      },
+    ],
+    [],
   );
 
   const loadDashboardData = useCallback(async () => {
@@ -310,63 +356,186 @@ export default function DashboardPage() {
     setStatusMessage("Mode tambah promo aktif.");
   };
 
+  const handleScrollToSection = (sectionId) => {
+    const section = document.getElementById(sectionId);
+
+    if (!section) return;
+
+    section.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-brand-cream">
-      <DashboardHeader />
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(197,163,104,0.12),transparent_22%),linear-gradient(180deg,#f8f5ef_0%,#fbfbf9_48%,#f6f0e7_100%)]">
+      <div className="mx-auto max-w-[1500px] px-4 py-4 sm:px-6 lg:px-8">
+        <div className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
+          <aside className="xl:sticky xl:top-4 xl:self-start">
+            <div className="overflow-hidden rounded-[2rem] border border-white/70 bg-brand-navy text-white shadow-[0_24px_80px_rgba(15,23,42,0.22)]">
+              <div className="border-b border-white/10 px-6 py-7">
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.35em] text-brand-gold/90">
+                  Admin Workspace
+                </span>
+                <h2 className="mt-3 text-3xl leading-tight">
+                  Dashboard
+                  <br />
+                  Konten Web
+                </h2>
+                <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/65">
+                  Fokus mengelola promo rumah dan materi visual dengan tampilan yang
+                  lebih rapi dan terarah.
+                </p>
+              </div>
 
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <DashboardStats stats={stats} />
-        <StatusMessage message={statusMessage} />
+              <div className="space-y-2 px-4 py-5">
+                {sidebarItems.map((item) => {
+                  const Icon = item.icon;
 
-        <div className="grid gap-8 xl:grid-cols-[1.05fr_0.95fr]">
-          <PromoForm
-            promoForm={promoForm}
-            editingPromoId={editingPromoId}
-            onPromoChange={handlePromoChange}
-            onImageUpload={handlePromoImageUpload}
-            onDragOver={() => setPromoDropActive(true)}
-            onDragLeave={() => setPromoDropActive(false)}
-            onDrop={(e) => {
-              e.preventDefault();
-              setPromoDropActive(false);
-              void handlePromoImageUpload(e.dataTransfer.files?.[0]);
-            }}
-            onImageChange={(event) => {
-              void handlePromoImageUpload(event.target.files?.[0]);
-            }}
-            uploadingImage={uploadingPromoImage}
-            fileName={promoImageFileName}
-            previewStats={promoPreviewStats}
-            onSubmit={handlePromoSubmit}
-            saving={savingPromo}
-            onCancelEdit={handleCancelEdit}
-          />
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => handleScrollToSection(item.id)}
+                      className="flex w-full items-start gap-3 rounded-2xl px-4 py-3 text-left transition hover:bg-white/8"
+                    >
+                      <div className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-brand-gold">
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold tracking-[0.08em] text-white">
+                          {item.label}
+                        </div>
+                        <div className="mt-1 text-xs leading-relaxed text-white/55">
+                          {item.caption}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
 
-          <GalleryUploadForm
-            galleryForm={galleryForm}
-            onGalleryChange={handleGalleryChange}
-            onImageSelect={(image) =>
-              setGalleryForm((current) => ({
-                ...current,
-                image: image,
-              }))
-            }
-            uploading={uploadingImage}
-            onSubmit={handleGallerySubmit}
-          />
+              <div className="border-t border-white/10 px-6 py-6">
+                <div className="rounded-[1.6rem] bg-white/8 p-5">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-brand-gold/90">
+                    Visual Focus
+                  </p>
+                  <p className="mt-3 text-sm leading-relaxed text-white/70">
+                    Sidebar ini menjaga dashboard terasa lebih terstruktur, dengan
+                    area kerja utama tetap lega untuk form dan preview.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </aside>
 
-          <PromoList
-            promos={promos}
-            loading={loading}
-            onEdit={handleEditPromo}
-            onDelete={handleDeletePromo}
-          />
+          <main className="space-y-6">
+            <div className="overflow-hidden rounded-[2rem] border border-white/75 bg-white/75 shadow-[0_18px_60px_rgba(15,23,42,0.08)] backdrop-blur">
+              <DashboardHeader />
+              <div className="grid gap-6 px-5 py-6 sm:px-6 lg:grid-cols-[minmax(0,1.1fr)_340px] lg:px-8">
+                <div>
+                  <span className="inline-flex rounded-full bg-brand-gold/12 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.32em] text-brand-gold">
+                    Admin Styling Refresh
+                  </span>
+                  <h2 className="mt-4 text-4xl leading-tight text-brand-navy">
+                    Panel admin yang lebih editorial, lebih mudah dipindai, dan
+                    lebih nyaman dipakai harian.
+                  </h2>
+                  <p className="mt-4 max-w-2xl text-sm leading-7 text-brand-navy/60">
+                    Fokusnya sekarang ada pada pengalaman visual: navigasi kiri yang
+                    jelas, blok kerja yang lebih terpisah, dan ritme layout yang
+                    terasa lebih matang seperti produk internal yang premium.
+                  </p>
+                </div>
 
-          <GalleryList
-            galleryImages={galleryImages}
-            loading={loading}
-            onDelete={handleDeleteImage}
-          />
+                <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
+                  <div className="rounded-[1.7rem] border border-brand-gold/15 bg-brand-gold/10 p-5">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-brand-gold">
+                      Fokus Utama
+                    </p>
+                    <p className="mt-3 text-sm leading-relaxed text-brand-navy/70">
+                      Promo rumah, upload galeri, dan daftar konten aktif.
+                    </p>
+                  </div>
+                  <div className="rounded-[1.7rem] border border-brand-navy/8 bg-brand-navy p-5 text-white">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-brand-gold">
+                      Nuansa
+                    </p>
+                    <p className="mt-3 text-sm leading-relaxed text-white/70">
+                      Lebih tenang, elegan, dan konsisten dengan identitas landing
+                      page.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <section id="ringkasan" className="space-y-6">
+              <DashboardStats stats={stats} />
+              <StatusMessage message={statusMessage} />
+            </section>
+
+            <div className="grid gap-8 2xl:grid-cols-[minmax(0,1.18fr)_minmax(360px,0.82fr)]">
+              <section id="promo-editor">
+                <PromoForm
+                  promoForm={promoForm}
+                  editingPromoId={editingPromoId}
+                  onPromoChange={handlePromoChange}
+                  onImageUpload={handlePromoImageUpload}
+                  onDragOver={() => setPromoDropActive(true)}
+                  onDragLeave={() => setPromoDropActive(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setPromoDropActive(false);
+                    void handlePromoImageUpload(e.dataTransfer.files?.[0]);
+                  }}
+                  onImageChange={(event) => {
+                    void handlePromoImageUpload(event.target.files?.[0]);
+                  }}
+                  uploadingImage={uploadingPromoImage}
+                  fileName={promoImageFileName}
+                  previewStats={promoPreviewStats}
+                  onSubmit={handlePromoSubmit}
+                  saving={savingPromo}
+                  onCancelEdit={handleCancelEdit}
+                />
+              </section>
+
+              <section id="gallery-editor">
+                <GalleryUploadForm
+                  galleryForm={galleryForm}
+                  onGalleryChange={handleGalleryChange}
+                  onImageSelect={(image) =>
+                    setGalleryForm((current) => ({
+                      ...current,
+                      image: image,
+                    }))
+                  }
+                  uploading={uploadingImage}
+                  onSubmit={handleGallerySubmit}
+                />
+              </section>
+            </div>
+
+            <div className="grid gap-8 2xl:grid-cols-[minmax(0,1.18fr)_minmax(360px,0.82fr)]">
+              <section id="promo-list">
+                <PromoList
+                  promos={promos}
+                  loading={loading}
+                  onEdit={handleEditPromo}
+                  onDelete={handleDeletePromo}
+                />
+              </section>
+
+              <section id="gallery-list">
+                <GalleryList
+                  galleryImages={galleryImages}
+                  loading={loading}
+                  onDelete={handleDeleteImage}
+                />
+              </section>
+            </div>
+          </main>
         </div>
       </div>
     </div>

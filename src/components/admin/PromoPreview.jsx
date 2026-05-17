@@ -23,9 +23,9 @@ const SPEC_LABELS = {
 
 export default function PromoPreview({ promoForm, previewStats }) {
   return (
-    <aside className="lg:sticky lg:top-24">
+    <aside className="2xl:sticky 2xl:top-24">
       <div className="overflow-hidden rounded-3xl border border-brand-dark/5 bg-white shadow-lg shadow-brand-navy/5">
-        <div className="relative aspect-4/3 bg-brand-cream sm:aspect-16/10 lg:aspect-4/3">
+        <div className="relative aspect-[16/10] bg-brand-cream">
           {promoForm.imageUrl ? (
             <Image
               src={promoForm.imageUrl}
@@ -80,7 +80,7 @@ export default function PromoPreview({ promoForm, previewStats }) {
                 );
               })}
               {promoForm.businessLabel ? (
-                <div className="rounded-2xl bg-brand-navy p-3 text-white">
+                <div className="rounded-2xl bg-brand-navy p-3 text-white col-span-2">
                   <span className="block font-bold">
                     {promoForm.businessLabel}
                   </span>
