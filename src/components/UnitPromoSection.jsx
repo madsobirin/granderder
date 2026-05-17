@@ -165,7 +165,7 @@ const UnitPromoSection = ({ promos = [] }) => {
                       })}
 
                       {promo.businessLabel ? (
-                        <div className="bg-brand-navy text-white p-4 rounded-2xl border border-brand-navy/20 flex flex-col items-center text-center col-span-2 sm:col-span-1">
+                        <div className="bg-brand-navy text-white p-4 rounded-2xl border border-brand-navy/20 flex flex-col items-center justify-center text-center col-span-2 sm:col-span-1">
                           <span className="text-xl font-bold mb-1">
                             {promo.businessLabel}
                           </span>
