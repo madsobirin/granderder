@@ -9,7 +9,7 @@ const Gallery = ({ images = [] }) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [showAll, setShowAll] = useState(false);
   const galleryItems = images;
-  const displayedImages = showAll ? galleryItems : galleryItems.slice(0, 6);
+  const displayedImages = showAll ? galleryItems : galleryItems.slice(0, 8);
 
   useEffect(() => {
     if (selectedImage !== null) {
@@ -102,51 +102,51 @@ const Gallery = ({ images = [] }) => {
           <>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {displayedImages.map((image, index) => (
-              <motion.div
-                key={image.id ?? index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.5, delay: (index % 4) * 0.1 }}
-                sizes="(max-width: 768px) 100vw, 25vw"
-                whileHover={{ y: -10 }}
-                onClick={() => image.imageUrl && setSelectedImage(index)}
-                className={`aspect-square rounded-3xl overflow-hidden shadow-xl ${image.imageUrl ? "cursor-pointer group" : "bg-brand-cream/50"}`}
-              >
-                <div className="relative w-full h-full">
-                  {image.imageUrl ? (
-                    <>
-                      <Image
-                        src={image.imageUrl}
-                        alt={image.title || `Gallery ${index + 1}`}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                        width={600}
-                        height={600}
-                      />
-                      <div className="absolute inset-0 bg-brand-navy/0 group-hover:bg-brand-navy/20 transition-colors duration-500 flex items-center justify-center">
-                        <div className="bg-white/90 text-brand-navy px-4 py-2 rounded-full font-medium text-sm opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 shadow-lg">
-                          Lihat Detail
+                <motion.div
+                  key={image.id ?? index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.5, delay: (index % 4) * 0.1 }}
+                  sizes="(max-width: 768px) 100vw, 25vw"
+                  whileHover={{ y: -10 }}
+                  onClick={() => image.imageUrl && setSelectedImage(index)}
+                  className={`aspect-square rounded-3xl overflow-hidden shadow-xl ${image.imageUrl ? "cursor-pointer group" : "bg-brand-cream/50"}`}
+                >
+                  <div className="relative w-full h-full">
+                    {image.imageUrl ? (
+                      <>
+                        <Image
+                          src={image.imageUrl}
+                          alt={image.title || `Gallery ${index + 1}`}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                          width={600}
+                          height={600}
+                        />
+                        <div className="absolute inset-0 bg-brand-navy/0 group-hover:bg-brand-navy/20 transition-colors duration-500 flex items-center justify-center">
+                          <div className="bg-white/90 text-brand-navy px-4 py-2 rounded-full font-medium text-sm opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 shadow-lg">
+                            Lihat Detail
+                          </div>
                         </div>
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-center p-4">
+                        <div className="text-4xl mb-2">📸</div>
+                        <p className="text-sm font-semibold text-brand-navy">
+                          Belum ada gambar
+                        </p>
+                        <p className="text-xs text-brand-navy/60 mt-1">
+                          {image.title || "Gallery"}
+                        </p>
                       </div>
-                    </>
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center text-center p-4">
-                      <div className="text-4xl mb-2">📸</div>
-                      <p className="text-sm font-semibold text-brand-navy">
-                        Belum ada gambar
-                      </p>
-                      <p className="text-xs text-brand-navy/60 mt-1">
-                        {image.title || "Gallery"}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            ))}
+                    )}
+                  </div>
+                </motion.div>
+              ))}
             </div>
 
-            {galleryItems.length > 6 && !showAll && (
-              <motion.div 
+            {galleryItems.length > 8 && !showAll && (
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="mt-12 flex justify-center"
