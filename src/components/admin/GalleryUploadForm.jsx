@@ -26,9 +26,8 @@ export default function GalleryUploadForm({
           <input
             value={galleryForm.title}
             onChange={(event) => onGalleryChange("title", event.target.value)}
-            placeholder="Judul gambar"
+            placeholder="Judul gambar (opsional)"
             className="rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 outline-none focus:border-brand-gold"
-            required
           />
           <input
             type="number"
@@ -47,12 +46,18 @@ export default function GalleryUploadForm({
               id="gallery-image-input"
               type="file"
               accept="image/*"
+              multiple
               onChange={(event) =>
-                onImageSelect(event.target.files?.[0] || null)
+                onImageSelect(Array.from(event.target.files || []))
               }
               className="block w-full text-sm"
               required
             />
+            {galleryForm.images?.length > 0 && (
+              <span className="mt-2 block text-xs text-brand-gold">
+                {galleryForm.images.length} gambar terpilih
+              </span>
+            )}
           </label>
           <label className="flex items-center gap-3 rounded-2xl border border-brand-navy/10 bg-brand-cream/40 px-4 py-3 text-sm text-brand-navy md:col-span-2">
             <input

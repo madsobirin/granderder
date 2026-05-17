@@ -31,6 +31,7 @@ export default function PromoPreview({ promoForm, previewStats }) {
               src={promoForm.imageUrl}
               alt={promoForm.title || "Preview promo rumah"}
               fill
+              sizes="(max-width: 768px) 100vw, 500px"
               className="object-cover"
             />
           ) : (

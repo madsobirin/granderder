@@ -22,6 +22,7 @@ export default function GalleryList({ galleryImages, loading, onDelete }) {
                     src={image.imageUrl}
                     alt={image.title}
                     fill
+                    sizes="(max-width: 768px) 100vw, 400px"
                     className="object-cover"
                   />
                 </div>

@@ -21,6 +21,7 @@ export default function PromoList({ promos, loading, onEdit, onDelete }) {
                       src={promo.imageUrl}
                       alt={promo.title}
                       fill
+                      sizes="(max-width: 768px) 100vw, 300px"
                       className="object-cover"
                     />
                   </div>

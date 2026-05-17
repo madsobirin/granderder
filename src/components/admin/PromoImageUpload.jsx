@@ -36,6 +36,7 @@ export default function PromoImageUpload({
               src={promoForm.imageUrl}
               alt={promoForm.title || "Preview gambar promo"}
               fill
+              sizes="(max-width: 768px) 100vw, 200px"
               className="object-cover"
             />
           ) : (

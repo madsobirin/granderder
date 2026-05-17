@@ -40,7 +40,7 @@ const emptyGalleryForm = {
   title: "",
   displayOrder: 0,
   isPublished: true,
-  image: null,
+  images: [],
 };
 
 export default function DashboardPage() {
@@ -57,6 +57,7 @@ export default function DashboardPage() {
   const [statusMessage, setStatusMessage] = useState("");
   const [promoDropActive, setPromoDropActive] = useState(false);
   const [promoImageFileName, setPromoImageFileName] = useState("");
+  const [activeTab, setActiveTab] = useState("ringkasan");
 
   const promoPreviewStats = useMemo(
     () =>
@@ -110,32 +111,20 @@ export default function DashboardPage() {
       {
         id: "ringkasan",
         label: "Ringkasan",
-        caption: "Statistik dan overview",
+        caption: "Statistik dan daftar konten",
         icon: LayoutDashboard,
       },
       {
         id: "promo-editor",
-        label: "Promo Rumah",
-        caption: "Kelola kartu promosi",
+        label: "Kelola Promo",
+        caption: "Input dan preview promo",
         icon: Sparkles,
       },
       {
         id: "gallery-editor",
-        label: "Galeri",
+        label: "Kelola Galeri",
         caption: "Upload foto terbaru",
         icon: Images,
-      },
-      {
-        id: "promo-list",
-        label: "Daftar Promo",
-        caption: "Edit konten yang tayang",
-        icon: MessageSquareQuote,
-      },
-      {
-        id: "gallery-list",
-        label: "Daftar Galeri",
-        caption: "Lihat semua gambar",
-        icon: FileImage,
       },
     ],
     [],
@@ -248,6 +237,7 @@ export default function DashboardPage() {
     });
     setPromoImageFileName("");
     setStatusMessage("Mode edit promo aktif.");
+    setActiveTab("promo-editor");
   };
 
   const handleDeletePromo = async (id) => {
@@ -263,34 +253,64 @@ export default function DashboardPage() {
 
   const handleGallerySubmit = async (event) => {
     event.preventDefault();
+    
+    if (!galleryForm.images || galleryForm.images.length === 0) {
+      setStatusMessage("Pilih minimal 1 gambar untuk diunggah.");
+      return;
+    }
+
     setUploadingImage(true);
+    let successCount = 0;
+    let failCount = 0;
 
-    const formData = new FormData();
-    formData.append("title", galleryForm.title);
-    formData.append("displayOrder", String(galleryForm.displayOrder));
-    formData.append("isPublished", String(galleryForm.isPublished));
-
-    if (galleryForm.image) {
-      formData.append("image", galleryForm.image);
-    }
-
-    const response = await fetch("/api/admin/gallery", {
-      method: "POST",
-      body: formData,
-    });
-
-    const data = await response.json();
-    setStatusMessage(data.message);
-
-    if (data.success) {
-      setGalleryForm(emptyGalleryForm);
-      const fileInput = document.getElementById("gallery-image-input");
-      if (fileInput) {
-        fileInput.value = "";
+    for (let i = 0; i < galleryForm.images.length; i++) {
+      setStatusMessage(`Mengunggah gambar ${i + 1} dari ${galleryForm.images.length}...`);
+      
+      const file = galleryForm.images[i];
+      const formData = new FormData();
+      
+      // Jika ada lebih dari 1 gambar dan judul diisi, tambahkan nomor urut ke judul (opsional)
+      let currentTitle = galleryForm.title || "Galeri Baru";
+      if (galleryForm.images.length > 1 && galleryForm.title) {
+        currentTitle = `${galleryForm.title} - ${i + 1}`;
+      } else if (!galleryForm.title) {
+        currentTitle = `Galeri Baru - ${i + 1}`;
       }
-      await loadDashboardData();
+      
+      formData.append("title", currentTitle);
+      formData.append("displayOrder", String(galleryForm.displayOrder));
+      formData.append("isPublished", String(galleryForm.isPublished));
+      formData.append("image", file);
+
+      try {
+        const response = await fetch("/api/admin/gallery", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          successCount++;
+        } else {
+          failCount++;
+        }
+      } catch (error) {
+        failCount++;
+      }
     }
 
+    if (failCount === 0) {
+      setStatusMessage(`Berhasil mengunggah ${successCount} gambar.`);
+    } else {
+      setStatusMessage(`Selesai: ${successCount} berhasil, ${failCount} gagal.`);
+    }
+
+    setGalleryForm(emptyGalleryForm);
+    const fileInput = document.getElementById("gallery-image-input");
+    if (fileInput) {
+      fileInput.value = "";
+    }
+    await loadDashboardData();
     setUploadingImage(false);
   };
 
@@ -357,14 +377,7 @@ export default function DashboardPage() {
   };
 
   const handleScrollToSection = (sectionId) => {
-    const section = document.getElementById(sectionId);
-
-    if (!section) return;
-
-    section.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
+    setActiveTab(sectionId);
   };
 
   return (
@@ -397,7 +410,9 @@ export default function DashboardPage() {
                       key={item.id}
                       type="button"
                       onClick={() => handleScrollToSection(item.id)}
-                      className="flex w-full items-start gap-3 rounded-2xl px-4 py-3 text-left transition hover:bg-white/8"
+                      className={`flex w-full items-start gap-3 rounded-2xl px-4 py-3 text-left transition ${
+                        activeTab === item.id ? "bg-white/15" : "hover:bg-white/8"
+                      }`}
                     >
                       <div className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-brand-gold">
                         <Icon className="h-5 w-5" />
@@ -470,71 +485,83 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <section id="ringkasan" className="space-y-6">
-              <DashboardStats stats={stats} />
-              <StatusMessage message={statusMessage} />
-            </section>
+            {activeTab === "ringkasan" && (
+              <div className="space-y-8">
+                <section id="ringkasan" className="space-y-6">
+                  <DashboardStats stats={stats} />
+                  <StatusMessage message={statusMessage} />
+                </section>
 
-            <div className="grid gap-8 2xl:grid-cols-[minmax(0,1.18fr)_minmax(360px,0.82fr)]">
-              <section id="promo-editor">
-                <PromoForm
-                  promoForm={promoForm}
-                  editingPromoId={editingPromoId}
-                  onPromoChange={handlePromoChange}
-                  onImageUpload={handlePromoImageUpload}
-                  onDragOver={() => setPromoDropActive(true)}
-                  onDragLeave={() => setPromoDropActive(false)}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    setPromoDropActive(false);
-                    void handlePromoImageUpload(e.dataTransfer.files?.[0]);
-                  }}
-                  onImageChange={(event) => {
-                    void handlePromoImageUpload(event.target.files?.[0]);
-                  }}
-                  uploadingImage={uploadingPromoImage}
-                  fileName={promoImageFileName}
-                  previewStats={promoPreviewStats}
-                  onSubmit={handlePromoSubmit}
-                  saving={savingPromo}
-                  onCancelEdit={handleCancelEdit}
-                />
-              </section>
+                <div className="grid gap-8 2xl:grid-cols-[minmax(0,1.18fr)_minmax(360px,0.82fr)]">
+                  <section id="promo-list">
+                    <PromoList
+                      promos={promos}
+                      loading={loading}
+                      onEdit={handleEditPromo}
+                      onDelete={handleDeletePromo}
+                    />
+                  </section>
 
-              <section id="gallery-editor">
-                <GalleryUploadForm
-                  galleryForm={galleryForm}
-                  onGalleryChange={handleGalleryChange}
-                  onImageSelect={(image) =>
-                    setGalleryForm((current) => ({
-                      ...current,
-                      image: image,
-                    }))
-                  }
-                  uploading={uploadingImage}
-                  onSubmit={handleGallerySubmit}
-                />
-              </section>
-            </div>
+                  <section id="gallery-list">
+                    <GalleryList
+                      galleryImages={galleryImages}
+                      loading={loading}
+                      onDelete={handleDeleteImage}
+                    />
+                  </section>
+                </div>
+              </div>
+            )}
 
-            <div className="grid gap-8 2xl:grid-cols-[minmax(0,1.18fr)_minmax(360px,0.82fr)]">
-              <section id="promo-list">
-                <PromoList
-                  promos={promos}
-                  loading={loading}
-                  onEdit={handleEditPromo}
-                  onDelete={handleDeletePromo}
-                />
-              </section>
+            {activeTab === "promo-editor" && (
+              <div className="space-y-6">
+                <StatusMessage message={statusMessage} />
+                <section id="promo-editor">
+                  <PromoForm
+                    promoForm={promoForm}
+                    editingPromoId={editingPromoId}
+                    onPromoChange={handlePromoChange}
+                    onImageUpload={handlePromoImageUpload}
+                    onDragOver={() => setPromoDropActive(true)}
+                    onDragLeave={() => setPromoDropActive(false)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setPromoDropActive(false);
+                      void handlePromoImageUpload(e.dataTransfer.files?.[0]);
+                    }}
+                    onImageChange={(event) => {
+                      void handlePromoImageUpload(event.target.files?.[0]);
+                    }}
+                    uploadingImage={uploadingPromoImage}
+                    fileName={promoImageFileName}
+                    previewStats={promoPreviewStats}
+                    onSubmit={handlePromoSubmit}
+                    saving={savingPromo}
+                    onCancelEdit={handleCancelEdit}
+                  />
+                </section>
+              </div>
+            )}
 
-              <section id="gallery-list">
-                <GalleryList
-                  galleryImages={galleryImages}
-                  loading={loading}
-                  onDelete={handleDeleteImage}
-                />
-              </section>
-            </div>
+            {activeTab === "gallery-editor" && (
+              <div className="space-y-6">
+                <StatusMessage message={statusMessage} />
+                <section id="gallery-editor">
+                  <GalleryUploadForm
+                    galleryForm={galleryForm}
+                    onGalleryChange={handleGalleryChange}
+                    onImageSelect={(images) =>
+                      setGalleryForm((current) => ({
+                        ...current,
+                        images: images,
+                      }))
+                    }
+                    uploading={uploadingImage}
+                    onSubmit={handleGallerySubmit}
+                  />
+                </section>
+              </div>
+            )}
           </main>
         </div>
       </div>
