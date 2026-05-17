@@ -7,7 +7,9 @@ import { X, ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
 
 const Gallery = ({ images = [] }) => {
   const [selectedImage, setSelectedImage] = useState(null);
+  const [showAll, setShowAll] = useState(false);
   const galleryItems = images;
+  const displayedImages = showAll ? galleryItems : galleryItems.slice(0, 6);
 
   useEffect(() => {
     if (selectedImage !== null) {
@@ -97,8 +99,9 @@ const Gallery = ({ images = [] }) => {
             </p>
           </motion.div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {galleryItems.map((image, index) => (
+          <>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {displayedImages.map((image, index) => (
               <motion.div
                 key={image.id ?? index}
                 initial={{ opacity: 0, y: 20 }}
@@ -140,7 +143,23 @@ const Gallery = ({ images = [] }) => {
                 </div>
               </motion.div>
             ))}
-          </div>
+            </div>
+
+            {galleryItems.length > 6 && !showAll && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="mt-12 flex justify-center"
+              >
+                <button
+                  onClick={() => setShowAll(true)}
+                  className="inline-flex items-center justify-center rounded-full border border-brand-gold/20 bg-white px-8 py-3.5 text-sm font-semibold uppercase tracking-[0.2em] text-brand-navy transition hover:bg-brand-cream shadow-lg shadow-brand-navy/5"
+                >
+                  Lihat Semua Foto ({galleryItems.length})
+                </button>
+              </motion.div>
+            )}
+          </>
         )}
       </div>
 
